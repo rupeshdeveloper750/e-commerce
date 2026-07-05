@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 
@@ -24,7 +26,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 
 class Admin extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes, HasRoles;
 
     /**
      * Get the attributes that should be cast.

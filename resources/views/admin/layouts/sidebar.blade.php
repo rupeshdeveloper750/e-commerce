@@ -6,10 +6,10 @@
 
 <div
     x-data="{
-        mobileOpen: false,
         openSections: {
             catalog: true,
             sales: true,
+            marketing: true,
             system: true
         },
         profileMenuOpen: false,
@@ -18,52 +18,25 @@
         }
     }"
     x-init="
-        $watch('mobileOpen', value => {
+        $watch('sidebarOpen', value => {
             document.body.style.overflow = value ? 'hidden' : '';
         });
     "
-    @keydown.escape.window="mobileOpen = false; profileMenuOpen = false"
+    @keydown.escape.window="sidebarOpen = false; profileMenuOpen = false"
     class="contents"
 >
-    {{-- ============================== --}}
-    {{-- Mobile Top Bar Trigger (Offcanvas Opener) --}}
-    {{-- ============================== --}}
-    <div class="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between h-16 px-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-[#E5E7EB] dark:border-slate-800">
-        <button
-            type="button"
-            @click="mobileOpen = true"
-            aria-label="Open sidebar navigation"
-            aria-controls="admin-sidebar"
-            :aria-expanded="mobileOpen"
-            class="inline-flex items-center justify-center w-10 h-10 rounded-xl text-[#111827] dark:text-slate-200 hover:bg-[#F3F4F6] dark:hover:bg-slate-800 transition-colors duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2"
-        >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
-            </svg>
-        </button>
-
-        <div class="flex items-center gap-2">
-            <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-[#0F172A]">
-                <span class="text-[#B88A44] font-bold text-sm tracking-tight">S</span>
-            </div>
-            <span class="font-semibold text-[15px] text-[#111827] dark:text-white tracking-tight">SHOPME</span>
-        </div>
-
-        <div class="w-10 h-10"></div>
-    </div>
-
     {{-- ============================== --}}
     {{-- Mobile Backdrop Overlay --}}
     {{-- ============================== --}}
     <div
-        x-show="mobileOpen"
+        x-show="sidebarOpen"
         x-transition:enter="transition-opacity ease-in-out duration-300"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
         x-transition:leave="transition-opacity ease-in-out duration-300"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
-        @click="mobileOpen = false"
+        @click="sidebarOpen = false"
         class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden"
         aria-hidden="true"
         style="display: none;"
@@ -76,14 +49,14 @@
         id="admin-sidebar"
         x-show="true"
         x-cloak
-        :class="mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
         class="fixed top-0 left-0 z-50 flex flex-col h-screen w-[280px] bg-white dark:bg-[#0F172A] border-r border-[#E5E7EB] dark:border-slate-800/80 transition-transform duration-300 ease-in-out will-change-transform lg:translate-x-0"
         aria-label="Primary Sidebar Navigation"
     >
         {{-- Mobile Close Button --}}
         <button
             type="button"
-            @click="mobileOpen = false"
+            @click="sidebarOpen = false"
             aria-label="Close sidebar navigation"
             class="lg:hidden absolute top-4 right-4 inline-flex items-center justify-center w-9 h-9 rounded-xl text-[#6B7280] dark:text-slate-400 hover:bg-[#F3F4F6] dark:hover:bg-slate-800 hover:text-[#111827] dark:hover:text-white transition-colors duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2"
         >
@@ -182,16 +155,16 @@
                     {{-- Categories --}}
                     <li>
                         <a
-                            href="{{ route('admin.categories.index') }}"
+                            href="{{ route('admin.categories.index', ['parent_id' => 'null']) }}"
                             @class([
                                 'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
-                                'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.categories.*'),
-                                'text-[#111827] dark:text-slate-300 hover:bg-[#F3F4F6] dark:hover:bg-slate-800/60 hover:text-[#111827] dark:hover:text-white' => !request()->routeIs('admin.categories.*'),
+                                'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.categories.*') && request('parent_id') === 'null',
+                                'text-[#111827] dark:text-slate-300 hover:bg-[#F3F4F6] dark:hover:bg-slate-800/60 hover:text-[#111827] dark:hover:text-white' => !(request()->routeIs('admin.categories.*') && request('parent_id') === 'null'),
                             ])
-                            aria-current="{{ request()->routeIs('admin.categories.*') ? 'page' : 'false' }}"
+                            aria-current="{{ (request()->routeIs('admin.categories.*') && request('parent_id') === 'null') ? 'page' : 'false' }}"
                         >
                             <span
-                                x-show="{{ request()->routeIs('admin.categories.*') ? 'true' : 'false' }}"
+                                x-show="{{ (request()->routeIs('admin.categories.*') && request('parent_id') === 'null') ? 'true' : 'false' }}"
                                 class="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-full bg-[#B88A44]"
                                 aria-hidden="true"
                             ></span>
@@ -205,16 +178,16 @@
                     {{-- Sub Categories --}}
                     <li>
                         <a
-                            href="#"
+                            href="{{ route('admin.categories.index', ['parent_id' => 'not_null']) }}"
                             @class([
                                 'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
-                                'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.subcategories.*'),
-                                'text-[#111827] dark:text-slate-300 hover:bg-[#F3F4F6] dark:hover:bg-slate-800/60 hover:text-[#111827] dark:hover:text-white' => !request()->routeIs('admin.subcategories.*'),
+                                'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.categories.*') && request('parent_id') === 'not_null',
+                                'text-[#111827] dark:text-slate-300 hover:bg-[#F3F4F6] dark:hover:bg-slate-800/60 hover:text-[#111827] dark:hover:text-white' => !(request()->routeIs('admin.categories.*') && request('parent_id') === 'not_null'),
                             ])
-                            aria-current="{{ request()->routeIs('admin.subcategories.*') ? 'page' : 'false' }}"
+                            aria-current="{{ (request()->routeIs('admin.categories.*') && request('parent_id') === 'not_null') ? 'page' : 'false' }}"
                         >
                             <span
-                                x-show="{{ request()->routeIs('admin.subcategories.*') ? 'true' : 'false' }}"
+                                x-show="{{ (request()->routeIs('admin.categories.*') && request('parent_id') === 'not_null') ? 'true' : 'false' }}"
                                 class="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-full bg-[#B88A44]"
                                 aria-hidden="true"
                             ></span>
@@ -228,7 +201,7 @@
                     {{-- Brands --}}
                     <li>
                         <a
-                            href="#"
+                            href="{{ route('admin.brands.index') }}"
                             @class([
                                 'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
                                 'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.brands.*'),
@@ -251,7 +224,7 @@
                     {{-- Products --}}
                     <li>
                         <a
-                            href="#"
+                            href="{{ route('admin.products.index') }}"
                             @class([
                                 'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
                                 'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.products.*'),
@@ -274,7 +247,7 @@
                     {{-- Inventory --}}
                     <li>
                         <a
-                            href="#"
+                            href="{{ route('admin.inventory.index') }}"
                             @class([
                                 'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
                                 'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.inventory.*'),
@@ -327,7 +300,7 @@
                     {{-- Orders --}}
                     <li>
                         <a
-                            href="#"
+                            href="{{ route('admin.orders.index') }}"
                             @class([
                                 'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
                                 'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.orders.*'),
@@ -350,7 +323,7 @@
                     {{-- Transactions --}}
                     <li>
                         <a
-                            href="#"
+                            href="{{ route('admin.transactions.index') }}"
                             @class([
                                 'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
                                 'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.transactions.*'),
@@ -373,7 +346,7 @@
                     {{-- Coupons --}}
                     <li>
                         <a
-                            href="#"
+                            href="{{ route('admin.coupons.index') }}"
                             @class([
                                 'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
                                 'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.coupons.*'),
@@ -396,7 +369,7 @@
                     {{-- Customers --}}
                     <li>
                         <a
-                            href="#"
+                            href="{{ route('admin.customers.index') }}"
                             @class([
                                 'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
                                 'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.customers.*'),
@@ -419,7 +392,7 @@
                     {{-- Reviews --}}
                     <li>
                         <a
-                            href="#"
+                            href="{{ route('admin.reviews.index') }}"
                             @class([
                                 'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
                                 'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.reviews.*'),
@@ -442,7 +415,7 @@
                     {{-- Support --}}
                     <li>
                         <a
-                            href="#"
+                            href="{{ route('admin.support.index') }}"
                             @class([
                                 'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
                                 'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.support.*'),
@@ -459,6 +432,82 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
                             </svg>
                             <span>Support</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            {{-- =============== MARKETING =============== --}}
+            <div>
+                <button
+                    type="button"
+                    @click="toggleSection('marketing')"
+                    class="w-full flex items-center justify-between px-3 mb-2 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] rounded-md"
+                    :aria-expanded="openSections.marketing"
+                    aria-controls="section-marketing"
+                >
+                    <span class="text-[11px] font-semibold tracking-widest text-[#6B7280] dark:text-slate-500 uppercase select-none">
+                        Marketing
+                    </span>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-3.5 h-3.5 text-[#6B7280] dark:text-slate-500 transition-transform duration-300 ease-in-out"
+                        :class="openSections.marketing ? 'rotate-180' : 'rotate-0'"
+                        fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                </button>
+
+                <ul
+                    id="section-marketing"
+                    x-show="openSections.marketing"
+                    x-collapse
+                    class="space-y-1"
+                >
+                    {{-- Banners --}}
+                    <li>
+                        <a
+                            href="{{ route('admin.banners.index') }}"
+                            @class([
+                                'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
+                                'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.banners.*'),
+                                'text-[#111827] dark:text-slate-300 hover:bg-[#F3F4F6] dark:hover:bg-slate-800/60 hover:text-[#111827] dark:hover:text-white' => !request()->routeIs('admin.banners.*'),
+                            ])
+                            aria-current="{{ request()->routeIs('admin.banners.*') ? 'page' : 'false' }}"
+                        >
+                            <span
+                                x-show="{{ request()->routeIs('admin.banners.*') ? 'true' : 'false' }}"
+                                class="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-full bg-[#B88A44]"
+                                aria-hidden="true"
+                            ></span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                            </svg>
+                            <span>Banners & Sliders</span>
+                        </a>
+                    </li>
+
+                    {{-- Blogs --}}
+                    <li>
+                        <a
+                            href="{{ route('admin.blogs.index') }}"
+                            @class([
+                                'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
+                                'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.blogs.*'),
+                                'text-[#111827] dark:text-slate-300 hover:bg-[#F3F4F6] dark:hover:bg-slate-800/60 hover:text-[#111827] dark:hover:text-white' => !request()->routeIs('admin.blogs.*'),
+                            ])
+                            aria-current="{{ request()->routeIs('admin.blogs.*') ? 'page' : 'false' }}"
+                        >
+                            <span
+                                x-show="{{ request()->routeIs('admin.blogs.*') ? 'true' : 'false' }}"
+                                class="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-full bg-[#B88A44]"
+                                aria-hidden="true"
+                            ></span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125H3.375A1.125 1.125 0 012.25 18V6.75c0-.621.504-1.125 1.125-1.125H5.25m11.25 0V4.5A1.5 1.5 0 0015 3h-3a1.5 1.5 0 00-1.5 1.5V6.75M2.25 7.5h19.5" />
+                            </svg>
+                            <span>Blogs & News</span>
                         </a>
                     </li>
                 </ul>
@@ -495,7 +544,7 @@
                     {{-- Reports --}}
                     <li>
                         <a
-                            href="#"
+                            href="{{ route('admin.reports.index') }}"
                             @class([
                                 'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
                                 'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.reports.*'),
@@ -518,7 +567,7 @@
                     {{-- Settings --}}
                     <li>
                         <a
-                            href="#"
+                            href="{{ route('admin.settings.index') }}"
                             @class([
                                 'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
                                 'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.settings.*'),
@@ -539,10 +588,33 @@
                         </a>
                     </li>
 
+                    {{-- Activity Logs --}}
+                    <li>
+                        <a
+                            href="{{ route('admin.activity-logs.index') }}"
+                            @class([
+                                'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
+                                'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.activity-logs.*'),
+                                'text-[#111827] dark:text-slate-300 hover:bg-[#F3F4F6] dark:hover:bg-slate-800/60 hover:text-[#111827] dark:hover:text-white' => !request()->routeIs('admin.activity-logs.*'),
+                            ])
+                            aria-current="{{ request()->routeIs('admin.activity-logs.*') ? 'page' : 'false' }}"
+                        >
+                            <span
+                                x-show="{{ request()->routeIs('admin.activity-logs.*') ? 'true' : 'false' }}"
+                                class="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-full bg-[#B88A44]"
+                                aria-hidden="true"
+                            ></span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                            </svg>
+                            <span>Activity Logs</span>
+                        </a>
+                    </li>
+
                     {{-- Admins --}}
                     <li>
                         <a
-                            href="#"
+                            href="{{ route('admin.admins.index') }}"
                             @class([
                                 'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
                                 'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.admins.*'),
@@ -562,10 +634,56 @@
                         </a>
                     </li>
 
+                    {{-- Roles --}}
+                    <li>
+                        <a
+                            href="{{ route('admin.roles.index') }}"
+                            @class([
+                                'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
+                                'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.roles.*'),
+                                'text-[#111827] dark:text-slate-300 hover:bg-[#F3F4F6] dark:hover:bg-slate-800/60 hover:text-[#111827] dark:hover:text-white' => !request()->routeIs('admin.roles.*'),
+                            ])
+                            aria-current="{{ request()->routeIs('admin.roles.*') ? 'page' : 'false' }}"
+                        >
+                            <span
+                                x-show="{{ request()->routeIs('admin.roles.*') ? 'true' : 'false' }}"
+                                class="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-full bg-[#B88A44]"
+                                aria-hidden="true"
+                            ></span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.745 3.745 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+                            </svg>
+                            <span>Roles</span>
+                        </a>
+                    </li>
+
+                    {{-- Permissions --}}
+                    <li>
+                        <a
+                            href="{{ route('admin.permissions.index') }}"
+                            @class([
+                                'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
+                                'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.permissions.*'),
+                                'text-[#111827] dark:text-slate-300 hover:bg-[#F3F4F6] dark:hover:bg-slate-800/60 hover:text-[#111827] dark:hover:text-white' => !request()->routeIs('admin.permissions.*'),
+                            ])
+                            aria-current="{{ request()->routeIs('admin.permissions.*') ? 'page' : 'false' }}"
+                        >
+                            <span
+                                x-show="{{ request()->routeIs('admin.permissions.*') ? 'true' : 'false' }}"
+                                class="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-full bg-[#B88A44]"
+                                aria-hidden="true"
+                            ></span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                            </svg>
+                            <span>Permissions</span>
+                        </a>
+                    </li>
+
                     {{-- Profile --}}
                     <li>
                         <a
-                            href="#"
+                            href="{{ route('admin.profile.index') }}"
                             @class([
                                 'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2',
                                 'bg-[rgba(184,138,68,.10)] text-[#B88A44] font-semibold' => request()->routeIs('admin.profile.*'),
@@ -618,7 +736,7 @@
             >
                 <span class="relative flex-shrink-0">
                     <img
-                        src="{{ auth('admin')->user()?->avatar_url ?? 'https://ui-avatars.com/api/?name=Admin&background=0F172A&color=B88A44' }}"
+                        src="{{ auth('admin')->user()?->profile_photo ? Storage::url(auth('admin')->user()->profile_photo) : 'https://ui-avatars.com/api/?name=' . urlencode(auth('admin')->user()?->name ?? 'Admin') . '&background=B88A44&color=fff' }}"
                         alt="{{ auth('admin')->user()?->name ?? 'Admin' }} avatar"
                         class="w-9 h-9 rounded-full object-cover ring-2 ring-white dark:ring-[#0F172A]"
                     >
@@ -650,13 +768,13 @@
                 class="absolute bottom-full left-4 right-4 mb-2 rounded-xl bg-white dark:bg-slate-800 border border-[#E5E7EB] dark:border-slate-700 shadow-lg overflow-hidden"
                 style="display: none;"
             >
-                <a href="#" class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-[#111827] dark:text-slate-200 hover:bg-[#F3F4F6] dark:hover:bg-slate-700/60 transition-colors duration-300 ease-in-out">
+                <a href="{{ route('admin.profile.index') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-[#111827] dark:text-slate-200 hover:bg-[#F3F4F6] dark:hover:bg-slate-700/60 transition-colors duration-300 ease-in-out">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.964 0a9 9 0 10-11.964 0m11.964 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                     View Profile
                 </a>
-                <a href="#" class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-[#111827] dark:text-slate-200 hover:bg-[#F3F4F6] dark:hover:bg-slate-700/60 transition-colors duration-300 ease-in-out">
+                <a href="{{ route('admin.profile.index') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-[#111827] dark:text-slate-200 hover:bg-[#F3F4F6] dark:hover:bg-slate-700/60 transition-colors duration-300 ease-in-out">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />

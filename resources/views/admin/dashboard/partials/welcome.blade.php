@@ -27,19 +27,19 @@
 
         <div class="flex gap-3">
 
-            <button
-                class="rounded-xl bg-[#B88A44] px-5 py-3 text-white transition hover:scale-105 hover:bg-[#a6793d]">
+            <a href="{{ route('admin.products.create') }}"
+                class="inline-flex items-center justify-center rounded-xl bg-[#B88A44] px-5 py-3 text-white transition hover:scale-105 hover:bg-[#a6793d]">
 
                 + Add Product
 
-            </button>
+            </a>
 
-            <button
-                class="rounded-xl border border-gray-300 bg-white px-5 py-3 transition hover:bg-gray-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800">
+            <a href="{{ route('admin.orders.index') }}"
+                class="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-5 py-3 text-gray-700 dark:text-slate-300 transition hover:bg-gray-100 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800">
 
                 View Orders
 
-            </button>
+            </a>
 
         </div>
 

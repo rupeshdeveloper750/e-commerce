@@ -8,6 +8,9 @@ use App\Http\Requests\Admin\Category\UpdateCategoryRequest;
 use App\Models\Category;
 use App\Repositories\Admin\CategoryRepository;
 use App\Services\Admin\CategoryService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Response;
 
 class CategoryController extends Controller
 {
@@ -19,11 +22,15 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = $this->categoryRepository->getAllPaginated();
+        Gate::authorize('manage-categories');
 
-        return view('admin.category.index', compact('categories'));
+        $filters = $request->only(['search', 'status', 'parent_id', 'trashed', 'sort_by', 'sort_order']);
+        $categories = $this->categoryRepository->getAllPaginated($filters, 10);
+        $parentCategories = $this->categoryRepository->getParentCategories();
+
+        return view('admin.category.index', compact('categories', 'parentCategories'));
     }
 
     /**
@@ -31,10 +38,10 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        return view('admin.category.create');
+        Gate::authorize('manage-categories');
 
-        // Agar future me page use karna ho to:
-        // return view('admin.category.create');
+        $categories = $this->categoryRepository->getParentCategories();
+        return view('admin.category.create', compact('categories'));
     }
 
     /**
@@ -42,6 +49,8 @@ class CategoryController extends Controller
      */
     public function store(StoreCategoryRequest $request)
     {
+        Gate::authorize('manage-categories');
+
         $this->categoryService->store($request->validated());
 
         return redirect()
@@ -54,6 +63,8 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
+        Gate::authorize('manage-categories');
+
         return view('admin.category.show', compact('category'));
     }
 
@@ -62,7 +73,11 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-        return view('admin.category.edit', compact('category'));
+        Gate::authorize('manage-categories');
+
+        $categories = $this->categoryRepository->getParentCategories();
+
+        return view('admin.category.edit', compact('category', 'categories'));
     }
 
     /**
@@ -70,6 +85,8 @@ class CategoryController extends Controller
      */
     public function update(UpdateCategoryRequest $request, Category $category)
     {
+        Gate::authorize('manage-categories');
+
         $this->categoryService->update(
             $category,
             $request->validated()
@@ -81,14 +98,113 @@ class CategoryController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource from storage. (Soft Delete)
      */
     public function destroy(Category $category)
     {
+        Gate::authorize('manage-categories');
+
         $this->categoryService->destroy($category);
 
         return redirect()
             ->route('admin.categories.index')
-            ->with('success', 'Category deleted successfully.');
+            ->with('success', 'Category soft-deleted successfully.');
+    }
+
+    /**
+     * Restore the specified soft-deleted resource.
+     */
+    public function restore($id)
+    {
+        Gate::authorize('manage-categories');
+
+        $category = Category::onlyTrashed()->findOrFail($id);
+        $this->categoryService->restore($category);
+
+        return redirect()
+            ->route('admin.categories.index')
+            ->with('success', 'Category restored successfully.');
+    }
+
+    /**
+     * Permanently delete the specified resource.
+     */
+    public function forceDelete($id)
+    {
+        Gate::authorize('manage-categories');
+
+        $category = Category::withTrashed()->findOrFail($id);
+        $this->categoryService->forceDelete($category);
+
+        return redirect()
+            ->route('admin.categories.index')
+            ->with('success', 'Category permanently deleted.');
+    }
+
+    /**
+     * Bulk actions (Soft Delete, Restore, Force Delete)
+     */
+    public function bulkAction(Request $request)
+    {
+        Gate::authorize('manage-categories');
+
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'numeric',
+            'action' => 'required|string|in:delete,restore,force_delete',
+        ]);
+
+        $ids = $request->ids;
+        $action = $request->action;
+        $count = 0;
+
+        if ($action === 'delete') {
+            $count = $this->categoryService->bulkDelete($ids);
+            $msg = "{$count} categories soft-deleted successfully.";
+        } elseif ($action === 'restore') {
+            $count = $this->categoryService->bulkRestore($ids);
+            $msg = "{$count} categories restored successfully.";
+        } elseif ($action === 'force_delete') {
+            $count = $this->categoryService->bulkForceDelete($ids);
+            $msg = "{$count} categories permanently deleted.";
+        }
+
+        return redirect()
+            ->route('admin.categories.index')
+            ->with('success', $msg ?? 'Bulk action completed.');
+    }
+
+    /**
+     * Export categories to CSV
+     */
+    public function export()
+    {
+        Gate::authorize('manage-categories');
+
+        $csv = $this->categoryService->exportCsv();
+        
+        return Response::make($csv, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="categories-export-' . now()->format('Y-m-d') . '.csv"',
+        ]);
+    }
+
+    /**
+     * Import categories from CSV
+     */
+    public function import(Request $request)
+    {
+        Gate::authorize('manage-categories');
+
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:4096',
+        ]);
+
+        $file = $request->file('csv_file');
+        $count = $this->categoryService->importCsv($file->getRealPath());
+
+        return redirect()
+            ->route('admin.categories.index')
+            ->with('success', "Successfully imported {$count} categories.");
     }
 }

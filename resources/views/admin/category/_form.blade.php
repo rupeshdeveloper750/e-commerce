@@ -10,7 +10,7 @@
 @php
     $isEdit    = isset($category);
     $formId    = 'category-form';
-    $statusOld = old('status', $isEdit ? $category->status : 'active');
+    $statusOld = old('status', $isEdit ? ($category->status ? 1 : 0) : 1);
 @endphp
 
 <form
@@ -252,9 +252,9 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <label for="status_toggle" class="text-sm font-medium text-slate-200">
-                                <span id="status-label-text">{{ $statusOld === 'active' ? 'Active' : 'Inactive' }}</span>
+                                <span id="status-label-text">{{ $statusOld == 1 ? 'Active' : 'Inactive' }}</span>
                             </label>
-                            <p class="text-xs text-slate-400">{{ $statusOld === 'active' ? 'Visible to customers' : 'Hidden from customers' }}</p>
+                            <p class="text-xs text-slate-400">{{ $statusOld == 1 ? 'Visible to customers' : 'Hidden from customers' }}</p>
                         </div>
 
                         {{-- Toggle Switch --}}
@@ -262,15 +262,15 @@
                             type="button"
                             id="status_toggle"
                             role="switch"
-                            aria-checked=" $statusOld = old('status', $isEdit ? $category->status : 1);"
+                            aria-checked="{{ $statusOld == 1 ? 'true' : 'false' }}"
                             aria-labelledby="status-label-text"
                             class="relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-900
-                                {{ $statusOld === 'active' ? 'bg-amber-500' : 'bg-slate-700' }}"
+                                {{ $statusOld == 1 ? 'bg-amber-500' : 'bg-slate-700' }}"
                         >
                             <span
                                 id="status_toggle_knob"
                                 class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-200
-                                    {{ $statusOld === 'active' ? 'translate-x-6' : 'translate-x-1' }}"
+                                    {{ $statusOld == 1 ? 'translate-x-6' : 'translate-x-1' }}"
                             ></span>
                         </button>
 

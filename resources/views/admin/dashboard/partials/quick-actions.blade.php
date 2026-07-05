@@ -17,7 +17,7 @@
     <div class="grid grid-cols-2 gap-4 p-6">
 
         {{-- Add Product --}}
-        <a href="#"
+        <a href="{{ route('admin.products.create') }}"
             class="group rounded-2xl border border-gray-200 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#B88A44] hover:shadow-lg dark:border-slate-700 dark:hover:border-[#B88A44]">
 
             <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#B88A44]/10 text-[#B88A44]">
@@ -48,7 +48,7 @@
         </a>
 
         {{-- Categories --}}
-        <a href="#"
+        <a href="{{ route('admin.categories.index', ['parent_id' => 'null']) }}"
             class="group rounded-2xl border border-gray-200 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#B88A44] hover:shadow-lg dark:border-slate-700 dark:hover:border-[#B88A44]">
 
             <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
@@ -68,7 +68,7 @@
         </a>
 
         {{-- Orders --}}
-        <a href="#"
+        <a href="{{ route('admin.orders.index') }}"
             class="group rounded-2xl border border-gray-200 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#B88A44] hover:shadow-lg dark:border-slate-700 dark:hover:border-[#B88A44]">
 
             <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-green-600">
@@ -88,7 +88,7 @@
         </a>
 
         {{-- Customers --}}
-        <a href="#"
+        <a href="{{ route('admin.customers.index') }}"
             class="group rounded-2xl border border-gray-200 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#B88A44] hover:shadow-lg dark:border-slate-700 dark:hover:border-[#B88A44]">
 
             <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
