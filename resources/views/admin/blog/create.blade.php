@@ -78,9 +78,10 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    (function () {
         const titleInput = document.getElementById('title');
         const slugInput = document.getElementById('slug');
+        if (!titleInput || !slugInput) return;
         
         titleInput.addEventListener('input', function () {
             if (slugInput.value.trim() === '') {
@@ -91,6 +92,6 @@
                     .replace(/-+/g, '-');
             }
         });
-    });
+    })();
 </script>
 @endsection

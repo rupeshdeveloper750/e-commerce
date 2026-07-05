@@ -54,8 +54,9 @@
 @push('scripts')
 
 <script>
-
-document.addEventListener("DOMContentLoaded", function () {
+(function () {
+    const chartEl = document.querySelector("#salesChart");
+    if (!chartEl) return;
 
     var options = {
 
@@ -167,10 +168,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     };
 
-    new ApexCharts(document.querySelector("#salesChart"), options).render();
-
-});
-
+    new ApexCharts(chartEl, options).render();
+})();
 </script>
 
 @endpush
