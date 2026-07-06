@@ -15,7 +15,7 @@
 
         </div>
 
-        <a href="#"
+        <a href="{{ route('admin.orders.index') }}"
             class="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium transition hover:bg-gray-100 dark:border-slate-700 dark:hover:bg-slate-800">
 
             View All
@@ -61,12 +61,7 @@
 
             <tbody class="divide-y divide-gray-100 dark:divide-slate-800">
 
-                @foreach ([
-                    ['name'=>'Rupesh Kumar','id'=>'#1001','amount'=>'₹3,250','payment'=>'Paid','status'=>'Delivered'],
-                    ['name'=>'Amit Sharma','id'=>'#1002','amount'=>'₹1,890','payment'=>'Pending','status'=>'Processing'],
-                    ['name'=>'Rahul Singh','id'=>'#1003','amount'=>'₹5,620','payment'=>'Paid','status'=>'Shipped'],
-                    ['name'=>'Neha Verma','id'=>'#1004','amount'=>'₹990','payment'=>'Failed','status'=>'Cancelled'],
-                ] as $order)
+                @foreach ($recentOrders as $order)
 
                 <tr class="transition hover:bg-gray-50 dark:hover:bg-slate-800/40">
 
@@ -76,14 +71,14 @@
                         <div class="flex items-center gap-3">
 
                             <img
-                                src="https://ui-avatars.com/api/?name={{ urlencode($order['name']) }}"
+                                src="https://ui-avatars.com/api/?name={{ urlencode($order->first_name . ' ' . $order->last_name) }}"
                                 class="h-10 w-10 rounded-full">
 
                             <div>
 
                                 <h4 class="font-semibold text-gray-900 dark:text-white">
 
-                                    {{ $order['name'] }}
+                                    {{ $order->first_name }} {{ $order->last_name }}
 
                                 </h4>
 
@@ -102,27 +97,27 @@
                     {{-- Order ID --}}
                     <td class="px-6 py-5 font-medium">
 
-                        {{ $order['id'] }}
+                        {{ $order->order_number }}
 
                     </td>
 
                     {{-- Amount --}}
                     <td class="px-6 py-5 font-semibold text-[#B88A44]">
 
-                        {{ $order['amount'] }}
+                        ₹{{ number_format($order->total, 2) }}
 
                     </td>
 
                     {{-- Payment --}}
                     <td class="px-6 py-5">
 
-                        @if($order['payment']=='Paid')
+                        @if($order->payment_status == 'paid')
 
                             <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-600">
                                 Paid
                             </span>
 
-                        @elseif($order['payment']=='Pending')
+                        @elseif($order->payment_status == 'pending')
 
                             <span class="rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-600">
                                 Pending
@@ -141,11 +136,23 @@
                     {{-- Delivery --}}
                     <td class="px-6 py-5">
 
-                        <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-600">
-
-                            {{ $order['status'] }}
-
-                        </span>
+                        @if($order->status == 'delivered')
+                            <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-600">
+                                Delivered
+                            </span>
+                        @elseif($order->status == 'cancelled')
+                            <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-600">
+                                Cancelled
+                            </span>
+                        @elseif($order->status == 'shipped')
+                            <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-600">
+                                Shipped
+                            </span>
+                        @else
+                            <span class="rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-600">
+                                {{ ucfirst($order->status) }}
+                            </span>
+                        @endif
 
                     </td>
 

@@ -13,63 +13,42 @@
             </p>
         </div>
 
-        <button
+        <a href="{{ route('admin.products.index') }}"
             class="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium transition hover:bg-gray-100 dark:border-slate-700 dark:hover:bg-slate-800">
             View All
-        </button>
+        </a>
 
     </div>
 
     {{-- Products --}}
     <div class="divide-y divide-gray-100 dark:divide-slate-800">
 
-        @foreach([
-            [
-                'name'=>'Nike Air Max',
-                'category'=>'Shoes',
-                'price'=>'₹4,999',
-                'sales'=>92
-            ],
-            [
-                'name'=>'Apple Watch',
-                'category'=>'Electronics',
-                'price'=>'₹28,999',
-                'sales'=>80
-            ],
-            [
-                'name'=>'Leather Backpack',
-                'category'=>'Fashion',
-                'price'=>'₹2,499',
-                'sales'=>68
-            ],
-            [
-                'name'=>'Wireless Headphones',
-                'category'=>'Electronics',
-                'price'=>'₹6,999',
-                'sales'=>60
-            ],
-        ] as $product)
+        @foreach($topProducts as $product)
 
         <div class="flex items-center gap-4 p-5 transition hover:bg-gray-50 dark:hover:bg-slate-800/40">
 
             {{-- Product Image --}}
-            <div
-                class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 dark:bg-slate-800">
+            @if($product['image_path'])
+                <img src="{{ asset('storage/' . $product['image_path']) }}" class="h-14 w-14 rounded-2xl object-cover border border-gray-100 dark:border-slate-800">
+            @else
+                <div
+                    class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 dark:bg-slate-800">
 
-                <svg xmlns="http://www.w3.org/2000/svg"
-                     class="h-7 w-7 text-[#B88A44]"
-                     fill="none"
-                     viewBox="0 0 24 24"
-                     stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="h-7 w-7 text-[#B88A44]"
+                         fill="none"
+                         viewBox="0 0 24 24"
+                         stroke="currentColor">
 
-                    <path stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="1.8"
-                          d="M20 7L12 3 4 7v10l8 4 8-4V7Z"/>
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="1.8"
+                              d="M20 7L12 3 4 7v10l8 4 8-4V7Z"/>
 
-                </svg>
+                    </svg>
 
-            </div>
+                </div>
+            @endif
 
             {{-- Details --}}
             <div class="flex-1">
@@ -105,7 +84,7 @@
 
                         <span>Sales</span>
 
-                        <span>{{ $product['sales'] }}%</span>
+                        <span>{{ $product['sales'] }} units</span>
 
                     </div>
 
@@ -113,7 +92,7 @@
 
                     <div
                     class="h-full rounded-full bg-[#B88A44]"
-                    style="--progress: {{ $product['sales'] }}%; width: var(--progress);">
+                    style="width: {{ $product['sales_percentage'] }}%;">
                     </div>
 
                     </div>

@@ -37,9 +37,7 @@ use App\Http\Controllers\Admin\Sales\SupportController;
 
 Route::middleware('auth:admin')->group(function () {
 
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard.dashboard');
-    })->name('admin.dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');
 
 
     // Categories Extra Actions

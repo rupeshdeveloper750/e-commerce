@@ -14,6 +14,8 @@
     @stack('styles')
     {{-- HTMX for Instant SPA Transitions --}}
     <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+    {{-- ApexCharts CDN for Chart rendering --}}
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 
 <body

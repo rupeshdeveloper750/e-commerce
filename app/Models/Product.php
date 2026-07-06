@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
     'quantity',
     'status',
     'is_featured',
+    'is_bestseller',
+    'bestseller_sort_order',
     'meta_title',
     'meta_description',
 ])]
@@ -32,6 +34,7 @@ class Product extends Model
         return [
             'status' => 'boolean',
             'is_featured' => 'boolean',
+            'is_bestseller' => 'boolean',
             'price' => 'decimal:2',
             'sale_price' => 'decimal:2',
         ];

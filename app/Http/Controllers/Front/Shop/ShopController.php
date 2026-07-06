@@ -26,17 +26,24 @@ class ShopController extends Controller
 
         // Category Filter
         if ($request->filled('category')) {
-            $categorySlug = $request->category;
-            $query->whereHas('category', function($q) use ($categorySlug) {
-                $q->where('slug', $categorySlug);
-            });
+            $categoriesInput = is_array($request->category) ? $request->category : explode(',', $request->category);
+            $categoryIds = Category::whereIn('slug', $categoriesInput)->pluck('id')->toArray();
+            
+            if (!empty($categoryIds)) {
+                $allCategoryIds = Category::whereIn('parent_id', $categoryIds)
+                    ->pluck('id')
+                    ->merge($categoryIds)
+                    ->unique()
+                    ->toArray();
+                $query->whereIn('category_id', $allCategoryIds);
+            }
         }
 
         // Brand Filter
         if ($request->filled('brand')) {
-            $brandSlug = $request->brand;
-            $query->whereHas('brand', function($q) use ($brandSlug) {
-                $q->where('slug', $brandSlug);
+            $brandsInput = is_array($request->brand) ? $request->brand : explode(',', $request->brand);
+            $query->whereHas('brand', function($q) use ($brandsInput) {
+                $q->whereIn('slug', $brandsInput);
             });
         }
 
@@ -65,11 +72,14 @@ class ShopController extends Controller
                 break;
             case 'latest':
             default:
-                $query->latest();
+                $query->orderBy('is_featured', 'desc')
+                      ->orderBy('is_bestseller', 'desc')
+                      ->orderByRaw('id % 5 ASC')
+                      ->latest();
                 break;
         }
 
-        $products = $query->paginate(12)->withQueryString();
+        $products = $query->paginate(24)->withQueryString();
         $categories = Category::where('status', true)->orderBy('name')->get();
         $brands = Brand::where('status', true)->orderBy('name')->get();
 

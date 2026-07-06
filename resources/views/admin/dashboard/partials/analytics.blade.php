@@ -61,11 +61,8 @@
         var chartEl = document.querySelector("#salesChart");
         if (!chartEl) return;
 
-        // Destroy existing chart if any (prevents duplicates on HTMX re-navigation)
-        if (salesChartInstance) {
-            salesChartInstance.destroy();
-            salesChartInstance = null;
-        }
+        // Clear container to prevent duplicate overlay renders
+        chartEl.innerHTML = "";
 
         var options = {
             chart: {
@@ -93,22 +90,19 @@
             dataLabels: { enabled: false },
             series: [{
                 name: 'Revenue',
-                data: [20,35,28,45,65,72,90,84,100,110,130,145]
+                data: {!! json_encode($chartData) !!}
             }],
             xaxis: {
-                categories: [
-                    'Jan','Feb','Mar','Apr','May','Jun',
-                    'Jul','Aug','Sep','Oct','Nov','Dec'
-                ]
+                categories: {!! json_encode($chartLabels) !!}
             },
             yaxis: {
                 labels: {
-                    formatter: function(val){ return "\u20B9"+val+"K"; }
+                    formatter: function(val){ return "\u20B9" + Number(val).toLocaleString('en-IN'); }
                 }
             },
             tooltip: {
                 y: {
-                    formatter: function(val){ return "\u20B9"+val+"K"; }
+                    formatter: function(val){ return "\u20B9" + Number(val).toLocaleString('en-IN'); }
                 }
             }
         };
@@ -117,8 +111,12 @@
         salesChartInstance.render();
     }
 
-    // Run on initial full page load
-    document.addEventListener('DOMContentLoaded', initSalesChart);
+    // Run on initial page load if already loaded, otherwise listen for event
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        initSalesChart();
+    } else {
+        document.addEventListener('DOMContentLoaded', initSalesChart);
+    }
 
     // Run after HTMX swaps the body (hx-boost navigation)
     document.addEventListener('htmx:afterSwap', initSalesChart);
