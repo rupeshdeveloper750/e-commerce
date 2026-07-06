@@ -55,7 +55,7 @@
     @keydown.window.prevent.meta.k="searchOpen = true"
     @keydown.window.prevent.ctrl.k="searchOpen = true"
     :class="{ 'dark': darkMode }"
-    class="h-full bg-gray-100 text-gray-800 antialiased dark:bg-slate-950 dark:text-white">
+    class="admin-panel h-full bg-gray-100 text-gray-800 antialiased dark:bg-slate-950 dark:text-white">
 
     <div class="min-h-screen" hx-boost="true">
 

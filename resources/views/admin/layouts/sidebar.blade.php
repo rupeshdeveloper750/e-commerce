@@ -47,10 +47,8 @@
     {{-- ============================== --}}
     <aside
         id="admin-sidebar"
-        x-show="true"
-        x-cloak
         :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-        class="fixed top-0 left-0 z-50 flex flex-col h-screen w-[280px] bg-white dark:bg-[#0F172A] border-r border-[#E5E7EB] dark:border-slate-800/80 transition-transform duration-300 ease-in-out will-change-transform lg:translate-x-0"
+        class="fixed top-0 left-0 z-50 flex flex-col h-screen w-[280px] bg-white dark:bg-[#0F172A] border-r border-[#E5E7EB] dark:border-slate-800/80 transition-transform duration-300 ease-in-out will-change-transform -translate-x-full lg:translate-x-0"
         aria-label="Primary Sidebar Navigation"
     >
         {{-- Mobile Close Button --}}
@@ -69,7 +67,7 @@
         {{-- Logo Area --}}
         {{-- ============================== --}}
         <div class="flex-shrink-0 px-6 pt-7 pb-6">
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2 rounded-xl">
+            <a href="{{ route('admin.dashboard') }}" @click="sidebarOpen = false" class="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88A44] focus-visible:ring-offset-2 rounded-xl">
                 <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-[#0F172A] dark:bg-slate-800 shadow-sm transition-transform duration-300 ease-in-out group-hover:scale-105">
                     <span class="text-[#B88A44] font-bold text-base tracking-tight">S</span>
                 </div>
@@ -93,6 +91,7 @@
         <nav
             class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 py-6 space-y-7 admin-sidebar-scroll"
             aria-label="Admin navigation sections"
+            @click="if ($event.target.closest('a[href]')) { sidebarOpen = false; }"
         >
             {{-- =============== MAIN =============== --}}
             <div>
@@ -705,7 +704,7 @@
 
                     {{-- Logout --}}
                     <li>
-                        <form method="POST" action="{{ route('admin.logout') }}">
+                        <form method="POST" action="{{ route('admin.logout') }}" hx-boost="false">
                             @csrf
                             <button
                                 type="submit"
@@ -782,7 +781,7 @@
                     Account Settings
                 </a>
                 <div class="border-t border-[#E5E7EB] dark:border-slate-700"></div>
-                <form method="POST" action="{{ route('admin.logout') }}">
+                <form method="POST" action="{{ route('admin.logout') }}" hx-boost="false">
                     @csrf
                     <button type="submit" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors duration-300 ease-in-out">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" aria-hidden="true">

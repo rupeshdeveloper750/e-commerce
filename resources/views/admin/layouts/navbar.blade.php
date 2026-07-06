@@ -125,7 +125,7 @@
                         Audit Logs
                     </a>
                     <hr class="border-gray-100 dark:border-slate-800">
-                    <form method="POST" action="{{ route('admin.logout') }}">
+                    <form method="POST" action="{{ route('admin.logout') }}" hx-boost="false">
                         @csrf
                         <button type="submit" class="w-full text-left px-4 py-2.5 text-xs text-rose-500 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-600 dark:hover:text-rose-300 transition">
                             Logout Console

@@ -55,120 +55,73 @@
 
 <script>
 (function () {
-    const chartEl = document.querySelector("#salesChart");
-    if (!chartEl) return;
+    var salesChartInstance = null;
 
-    var options = {
+    function initSalesChart() {
+        var chartEl = document.querySelector("#salesChart");
+        if (!chartEl) return;
 
-        chart: {
-
-            type: 'area',
-
-            height: 380,
-
-            toolbar: {
-
-                show: false
-
-            },
-
-            zoom: {
-
-                enabled: false
-
-            }
-
-        },
-
-        stroke: {
-
-            curve: 'smooth',
-
-            width: 4
-
-        },
-
-        colors: ['#B88A44'],
-
-        fill: {
-
-            type: 'gradient',
-
-            gradient: {
-
-                shadeIntensity: 1,
-
-                opacityFrom: .35,
-
-                opacityTo: .03
-
-            }
-
-        },
-
-        grid: {
-
-            borderColor: '#ECECEC'
-
-        },
-
-        dataLabels: {
-
-            enabled: false
-
-        },
-
-        series: [{
-
-            name: 'Revenue',
-
-            data: [20,35,28,45,65,72,90,84,100,110,130,145]
-
-        }],
-
-        xaxis: {
-
-            categories: [
-
-                'Jan','Feb','Mar','Apr','May','Jun',
-
-                'Jul','Aug','Sep','Oct','Nov','Dec'
-
-            ]
-
-        },
-
-        yaxis: {
-
-            labels: {
-
-                formatter: function(val){
-
-                    return "₹"+val+"K";
-
-                }
-
-            }
-
-        },
-
-        tooltip: {
-
-            y: {
-
-                formatter: function(val){
-
-                    return "₹"+val+"K";
-
-                }
-
-            }
-
+        // Destroy existing chart if any (prevents duplicates on HTMX re-navigation)
+        if (salesChartInstance) {
+            salesChartInstance.destroy();
+            salesChartInstance = null;
         }
 
-    };
+        var options = {
+            chart: {
+                type: 'area',
+                height: 380,
+                toolbar: { show: false },
+                zoom: { enabled: false }
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 4
+            },
+            colors: ['#B88A44'],
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: .35,
+                    opacityTo: .03
+                }
+            },
+            grid: {
+                borderColor: '#ECECEC'
+            },
+            dataLabels: { enabled: false },
+            series: [{
+                name: 'Revenue',
+                data: [20,35,28,45,65,72,90,84,100,110,130,145]
+            }],
+            xaxis: {
+                categories: [
+                    'Jan','Feb','Mar','Apr','May','Jun',
+                    'Jul','Aug','Sep','Oct','Nov','Dec'
+                ]
+            },
+            yaxis: {
+                labels: {
+                    formatter: function(val){ return "\u20B9"+val+"K"; }
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: function(val){ return "\u20B9"+val+"K"; }
+                }
+            }
+        };
 
-    new ApexCharts(chartEl, options).render();
+        salesChartInstance = new ApexCharts(chartEl, options);
+        salesChartInstance.render();
+    }
+
+    // Run on initial full page load
+    document.addEventListener('DOMContentLoaded', initSalesChart);
+
+    // Run after HTMX swaps the body (hx-boost navigation)
+    document.addEventListener('htmx:afterSwap', initSalesChart);
 })();
 </script>
 

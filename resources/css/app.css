@@ -1,3 +1,182 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ==========================================================================
+   ShopMe Admin Panel — Light/Dark Theme Customization & Overrides
+   These rules dynamically adapt dark-theme styled sections to light mode
+   when the parent html does not have the .dark class.
+   ========================================================================== */
+
+html:not(.dark) .admin-panel {
+    /* 1. Reset base page background and layout wrappers if they have dark classes */
+    background-color: #f1f5f9 !important; /* bg-gray-100 fallback to slate-100 */
+    color: #1e293b !important; /* text-gray-800 fallback to slate-800 */
+}
+
+/* 2. Container and box backgrounds */
+/* bg-[#111827] is the main panel background */
+html:not(.dark) .admin-panel .bg-\[\#111827\] {
+    background-color: #ffffff !important;
+}
+
+html:not(.dark) .admin-panel .bg-[#111827] {
+    background-color: #ffffff !important;
+}
+
+html:not(.dark) .admin-panel .bg-slate-900\/60 {
+    background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+html:not(.dark) .admin-panel .bg-slate-900 {
+    background-color: #f8fafc !important;
+}
+
+html:not(.dark) .admin-panel .bg-slate-900\/50 {
+    background-color: #f8fafc !important;
+}
+
+html:not(.dark) .admin-panel .bg-slate-950\/60 {
+    background-color: #ffffff !important;
+}
+
+html:not(.dark) .admin-panel .bg-slate-950\/80 {
+    background-color: #f8fafc !important;
+}
+
+html:not(.dark) .admin-panel .bg-slate-950 {
+    background-color: #f8fafc !important;
+}
+
+html:not(.dark) .admin-panel .bg-slate-800\/60 {
+    background-color: #f8fafc !important;
+}
+
+html:not(.dark) .admin-panel .bg-slate-800 {
+    background-color: #ffffff !important;
+}
+
+/* Table rows background and hover colors */
+html:not(.dark) .admin-panel .bg-slate-900\/40 {
+    background-color: rgba(248, 250, 252, 0.4) !important;
+}
+
+html:not(.dark) .admin-panel tr.hover\:bg-slate-900\/30:hover {
+    background-color: rgba(241, 245, 249, 0.85) !important;
+}
+
+html:not(.dark) .admin-panel .hover\:bg-slate-900\/30:hover {
+    background-color: rgba(241, 245, 249, 0.85) !important;
+}
+
+html:not(.dark) .admin-panel tr.hover\:bg-slate-900\/40:hover {
+    background-color: rgba(241, 245, 249, 0.85) !important;
+}
+
+html:not(.dark) .admin-panel tr.hover\:bg-slate-900\/60:hover {
+    background-color: rgba(241, 245, 249, 0.85) !important;
+}
+
+html:not(.dark) .admin-panel .hover\:bg-slate-900\/60:hover {
+    background-color: rgba(241, 245, 249, 0.85) !important;
+}
+
+html:not(.dark) .admin-panel .hover\:bg-slate-900\/50:hover {
+    background-color: rgba(241, 245, 249, 0.85) !important;
+}
+
+html:not(.dark) .admin-panel .hover\:bg-slate-900:hover {
+    background-color: #f1f5f9 !important;
+}
+
+html:not(.dark) .admin-panel .hover\:bg-slate-850:hover {
+    background-color: #f1f5f9 !important;
+}
+
+html:not(.dark) .admin-panel .hover\:bg-slate-800:hover {
+    background-color: #f1f5f9 !important;
+}
+
+html:not(.dark) .admin-panel .hover\:bg-slate-950:hover {
+    background-color: #f1f5f9 !important;
+}
+
+/* 3. Text color overrides */
+html:not(.dark) .admin-panel .text-white {
+    color: #0f172a !important;
+}
+
+html:not(.dark) .admin-panel .text-slate-100 {
+    color: #0f172a !important;
+}
+
+html:not(.dark) .admin-panel .text-slate-200 {
+    color: #1e293b !important;
+}
+
+html:not(.dark) .admin-panel .text-slate-300 {
+    color: #334155 !important;
+}
+
+html:not(.dark) .admin-panel .text-slate-400 {
+    color: #64748b !important;
+}
+
+html:not(.dark) .admin-panel .text-slate-500 {
+    color: #64748b !important;
+}
+
+html:not(.dark) .admin-panel .text-slate-350 {
+    color: #334155 !important;
+}
+
+html:not(.dark) .admin-panel .text-slate-450 {
+    color: #475569 !important;
+}
+
+html:not(.dark) .admin-panel .text-slate-550 {
+    color: #475569 !important;
+}
+
+html:not(.dark) .admin-panel .hover\:text-white:hover {
+    color: #0f172a !important;
+}
+
+/* 4. Border color overrides */
+html:not(.dark) .admin-panel .border-slate-800 {
+    border-color: #e2e8f0 !important;
+}
+
+html:not(.dark) .admin-panel .border-slate-700 {
+    border-color: #cbd5e1 !important;
+}
+
+html:not(.dark) .admin-panel .border-slate-850 {
+    border-color: #cbd5e1 !important;
+}
+
+html:not(.dark) .admin-panel .border-slate-900 {
+    border-color: #cbd5e1 !important;
+}
+
+html:not(.dark) .admin-panel .divide-slate-800 > :not([hidden]) ~ :not([hidden]) {
+    border-color: #e2e8f0 !important;
+}
+
+/* 5. Inputs, Textareas, Select elements and placeholders */
+html:not(.dark) .admin-panel .placeholder\:text-slate-500::placeholder {
+    color: #94a3b8 !important;
+}
+
+html:not(.dark) .admin-panel input::placeholder {
+    color: #94a3b8 !important;
+}
+
+html:not(.dark) .admin-panel textarea::placeholder {
+    color: #94a3b8 !important;
+}
+
+html:not(.dark) .admin-panel select option {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+}
