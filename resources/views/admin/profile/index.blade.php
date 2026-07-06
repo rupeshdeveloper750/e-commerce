@@ -166,66 +166,139 @@
         </form>
     </div>
 
-    {{-- Tab: Change Avatar --}}
-    <div x-show="activeTab === 'avatar'" x-transition
-         class="rounded-3xl border border-slate-800 bg-[#111827] p-8 shadow-xl"
-         style="display: none;">
-        <div class="mb-6 border-b border-slate-800 pb-4">
-            <h3 class="text-lg font-bold text-white">Profile Photo</h3>
-            <p class="text-xs text-slate-400 mt-0.5">Upload a new profile photo. Max size: 2MB. Formats: JPG, PNG, GIF, WEBP.</p>
-        </div>
-        <form action="{{ route('admin.profile.avatar') }}" method="POST" enctype="multipart/form-data"
-              x-data="{ preview: null, dragging: false }">
-            @csrf
-            @method('PUT')
+{{-- Tab: Change Avatar --}}
+<div x-show="activeTab === 'avatar'" x-transition
+     class="rounded-3xl border border-slate-800 bg-[#111827] p-8 shadow-xl"
+     style="display: none;">
+    <div class="mb-6 border-b border-slate-800 pb-4">
+        <h3 class="text-lg font-bold text-white">Profile Photo</h3>
+        <p class="text-xs text-slate-400 mt-0.5">Upload a new profile photo or capture directly from your camera. Max size: 2MB. Formats: JPG, PNG, GIF, WEBP.</p>
+    </div>
 
-            <div @dragover.prevent="dragging = true"
-                 @dragleave.prevent="dragging = false"
-                 @drop.prevent="dragging = false; const file = $event.dataTransfer.files[0]; if (file) { $refs.avatarInput.files = $event.dataTransfer.files; preview = URL.createObjectURL(file); }"
-                 :class="dragging ? 'border-[#B88A44] bg-[#B88A44]/5' : 'border-slate-700 bg-slate-900/30'"
-                 class="relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-10 transition cursor-pointer"
-                 @click="$refs.avatarInput.click()">
+    <form action="{{ route('admin.profile.avatar') }}" method="POST" enctype="multipart/form-data"
+          x-data="{
+              preview: null,
+              dragging: false,
+              cameraOpen: false,
+              stream: null,
 
-                <div x-show="preview !== null" class="mb-4">
-                    <img :src="preview" class="w-24 h-24 rounded-2xl object-cover border-4 border-slate-700 shadow-xl">
-                </div>
-                <div x-show="preview === null" class="mb-4">
-                    @if($admin->profile_photo)
-                        <img src="{{ Storage::url($admin->profile_photo) }}"
-                             class="w-24 h-24 rounded-2xl object-cover border-4 border-slate-700 shadow-xl">
-                    @else
-                        <div class="w-24 h-24 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                            </svg>
-                        </div>
-                    @endif
-                </div>
+              async openCamera() {
+                  try {
+                      this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                      this.$refs.video.srcObject = this.stream;
+                      this.cameraOpen = true;
+                  } catch (err) {
+                      alert('Camera access failed: ' + err.message);
+                  }
+              },
 
-                <p class="text-sm font-semibold text-slate-300">Click to upload or drag & drop</p>
-                <p class="mt-1 text-xs text-slate-500">PNG, JPG, GIF, WEBP up to 2MB</p>
+              closeCamera() {
+                  if (this.stream) {
+                      this.stream.getTracks().forEach(t => t.stop());
+                      this.stream = null;
+                  }
+                  this.cameraOpen = false;
+              },
 
-                <input x-ref="avatarInput" type="file" name="avatar" accept="image/*" class="hidden"
-                       @change="preview = URL.createObjectURL($event.target.files[0])">
+              capturePhoto() {
+                  const video = this.$refs.video;
+                  const canvas = this.$refs.canvas;
+                  canvas.width = video.videoWidth;
+                  canvas.height = video.videoHeight;
+                  const ctx = canvas.getContext('2d');
+                  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                  canvas.toBlob((blob) => {
+                      const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+                      const dt = new DataTransfer();
+                      dt.items.add(file);
+                      this.$refs.avatarInput.files = dt.files;
+
+                      this.preview = URL.createObjectURL(blob);
+                      this.closeCamera();
+                  }, 'image/jpeg', 0.9);
+              }
+          }"
+          @submit="closeCamera()">
+        @csrf
+        @method('PUT')
+
+        {{-- Upload / Drag-Drop Box --}}
+        <div x-show="!cameraOpen"
+             @dragover.prevent="dragging = true"
+             @dragleave.prevent="dragging = false"
+             @drop.prevent="dragging = false; const file = $event.dataTransfer.files[0]; if (file) { $refs.avatarInput.files = $event.dataTransfer.files; preview = URL.createObjectURL(file); }"
+             :class="dragging ? 'border-[#B88A44] bg-[#B88A44]/5' : 'border-slate-700 bg-slate-900/30'"
+             class="relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-10 transition cursor-pointer"
+             @click="$refs.avatarInput.click()">
+
+            <div x-show="preview !== null" class="mb-4">
+                <img :src="preview" class="w-24 h-24 rounded-2xl object-cover border-4 border-slate-700 shadow-xl">
+            </div>
+            <div x-show="preview === null" class="mb-4">
+                @if($admin->profile_photo)
+                    <img src="{{ Storage::url($admin->profile_photo) }}"
+                         class="w-24 h-24 rounded-2xl object-cover border-4 border-slate-700 shadow-xl">
+                @else
+                    <div class="w-24 h-24 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                    </div>
+                @endif
             </div>
 
-            @error('avatar') <p class="mt-2 text-xs text-rose-400">{{ $message }}</p> @enderror
+            <p class="text-sm font-semibold text-slate-300">Click to upload or drag & drop</p>
+            <p class="mt-1 text-xs text-slate-500">PNG, JPG, GIF, WEBP up to 2MB</p>
 
-            <div class="mt-6 flex justify-end gap-3 border-t border-slate-800 pt-6">
-                <button @click="activeTab = 'info'" type="button"
+            <input x-ref="avatarInput" type="file" name="avatar" accept="image/*" class="hidden"
+                   @click.stop
+                   @change="preview = URL.createObjectURL($event.target.files[0])">
+        </div>
+
+        {{-- Camera Live Preview --}}
+        <div x-show="cameraOpen" x-cloak class="flex flex-col items-center rounded-2xl border-2 border-[#B88A44]/40 bg-slate-900/30 p-6">
+            <video x-ref="video" autoplay playsinline class="w-full max-w-sm rounded-xl border border-slate-700 shadow-lg"></video>
+            <div class="mt-4 flex gap-3">
+                <button type="button" @click="capturePhoto()"
+                        class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#B88A44] px-5 text-sm font-semibold text-white hover:bg-[#a67936] transition">
+                    📸 Capture
+                </button>
+                <button type="button" @click="closeCamera()"
                         class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-700 bg-slate-800 px-5 text-sm font-semibold text-slate-300 hover:text-white transition">
                     Cancel
                 </button>
-                <button type="submit"
-                        class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#B88A44] px-6 text-sm font-semibold text-white shadow-md shadow-[#B88A44]/10 hover:bg-[#a67936] transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                    </svg>
-                    Upload Photo
-                </button>
             </div>
-        </form>
-    </div>
+        </div>
+
+        {{-- Hidden canvas used internally for capturing frame --}}
+        <canvas x-ref="canvas" class="hidden"></canvas>
+
+        {{-- Camera trigger button (only visible when camera closed) --}}
+        <div x-show="!cameraOpen" class="mt-4 flex justify-center">
+            <button type="button" @click="openCamera()"
+                    class="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-[#B88A44]/40 bg-[#B88A44]/10 px-5 text-sm font-semibold text-[#B88A44] hover:bg-[#B88A44]/20 transition">
+                📷 Capture from Camera
+            </button>
+        </div>
+
+        @error('avatar') <p class="mt-2 text-xs text-rose-400">{{ $message }}</p> @enderror
+
+        <div class="mt-6 flex justify-end gap-3 border-t border-slate-800 pt-6">
+            <button @click="activeTab = 'info'" type="button"
+                    class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-700 bg-slate-800 px-5 text-sm font-semibold text-slate-300 hover:text-white transition">
+                Cancel
+            </button>
+            <button type="submit"
+                    class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#B88A44] px-6 text-sm font-semibold text-white shadow-md shadow-[#B88A44]/10 hover:bg-[#a67936] transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
+                Upload Photo
+            </button>
+        </div>
+    </form>
+</div>
 
     {{-- Tab: Security / Change Password --}}
     <div x-show="activeTab === 'password'" x-transition
