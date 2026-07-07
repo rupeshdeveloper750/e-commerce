@@ -1,14 +1,14 @@
 @props(['categories', 'brands'])
 
-<aside class="w-full bg-white border border-[#EAEAEA] rounded-[24px] p-6 space-y-6 transition-all duration-300 hover:shadow-md">
-    <div class="border-b border-[#EAEAEA] pb-3 flex items-center justify-between">
+<aside class="w-full bg-white border border-[#EAEAEA] rounded-[24px] p-6 space-y-6 transition-all duration-300 hover:shadow-md max-h-[80vh] flex flex-col">
+    <div class="border-b border-[#EAEAEA] pb-3 flex items-center justify-between flex-shrink-0">
         <h2 class="font-serif text-lg font-bold text-[#111827]">Filters</h2>
         @if(request()->anyFilled(['category', 'brand', 'min_price', 'max_price', 'q', 'color', 'size', 'rating']))
             <a href="{{ route('store.shop') }}" class="text-[10px] font-bold text-[#B88A44] hover:text-[#A17F4F] uppercase tracking-wider underline">Reset Filters</a>
         @endif
     </div>
 
-    <form action="{{ route('store.shop') }}" method="GET" class="space-y-6" id="sidebar-filter-form">
+    <form action="{{ route('store.shop') }}" method="GET" class="space-y-6 overflow-y-auto pr-2 flex-grow scrollbar-thin scrollbar-thumb-gray-200" id="sidebar-filter-form">
         @if(request('q')) <input type="hidden" name="q" value="{{ request('q') }}"> @endif
         @if(request('sort')) <input type="hidden" name="sort" value="{{ request('sort') }}"> @endif
 
@@ -140,7 +140,7 @@
         </div>
 
         {{-- Action Buttons --}}
-        <div class="pt-4 flex items-center gap-2 border-t border-[#EAEAEA]">
+        <div class="pt-4 flex items-center gap-2 border-t border-[#EAEAEA] flex-shrink-0">
             <a href="{{ route('store.shop') }}" class="w-1/2 h-10 rounded-full border border-gray-200 text-xs font-bold uppercase tracking-wider text-gray-500 hover:bg-gray-50 transition duration-200 flex items-center justify-center">
                 Reset
             </a>

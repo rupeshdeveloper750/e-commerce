@@ -7,54 +7,55 @@
 
 <style>
 :root {
-    --cream: #faf9f6;
+    --cream: #FAF9F6;
     --white: #ffffff;
-    --gold: #c9973f;
-    --gold-light: #e0b96a;
-    --gold-dark: #a07830;
-    --charcoal: #1c1c1e;
-    --ink: #2c2c2e;
-    --muted: #6b6b76;
-    --border: #e8e6e1;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
-    --shadow-md: 0 2px 8px rgba(0,0,0,0.06), 0 12px 32px rgba(0,0,0,0.08);
-    --shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 24px 48px rgba(0,0,0,0.10);
+    --gold: #B88A44;
+    --gold-light: #Cda86e;
+    --gold-dark: #A17F4F;
+    --charcoal: #111827;
+    --ink: #1F2937;
+    --muted: #6B7280;
+    --border: #F0EDE8;
+    --shadow-sm: 0 4px 15px rgba(0,0,0,0.02);
+    --shadow-md: 0 10px 30px rgba(184,138,68,0.06);
+    --shadow-lg: 0 20px 40px rgba(0,0,0,0.04);
 }
 
-.cart-page { font-family: 'Inter', sans-serif; background: var(--cream); }
+.cart-page { font-family: 'Inter', sans-serif; background: #FAF9F6; }
 .cart-serif { font-family: 'Playfair Display', serif; }
 
 /* Cards */
 .cart-card {
     background: var(--white);
     border: 1px solid var(--border);
-    border-radius: 20px;
+    border-radius: 24px;
     box-shadow: var(--shadow-sm);
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .cart-card:hover {
     box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    transform: translateY(-4px);
+    border-color: rgba(184,138,68,0.2);
 }
 
 /* Gold Gradient Button */
 .btn-gold {
-    background: linear-gradient(135deg, #d4a84b 0%, #c9973f 50%, #b8843a 100%);
+    background: linear-gradient(135deg, #Cda86e 0%, #B88A44 50%, #A17F4F 100%);
     color: white;
     border: none;
-    border-radius: 100px;
+    border-radius: 16px;
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     font-size: 11px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 16px rgba(201,151,63,0.35);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 6px 20px rgba(184,138,68,0.25);
 }
 .btn-gold:hover {
-    background: linear-gradient(135deg, #e0b95a 0%, #d4a84b 50%, #c9973f 100%);
+    background: linear-gradient(135deg, #Ddb97f 0%, #Cda86e 50%, #B88A44 100%);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(201,151,63,0.45);
+    box-shadow: 0 10px 25px rgba(184,138,68,0.35);
 }
 
 /* Stepper */
@@ -228,7 +229,7 @@ gift-row label { cursor: pointer; display: flex; align-items: center; gap: 8px; 
 }
 </style>
 
-<div class="cart-page py-14 md:py-20 -mx-6 sm:-mx-8 lg:-mx-12 px-4 sm:px-8 lg:px-12 -mt-40 pt-40 min-h-screen"
+<div class="cart-page py-14 md:py-20 -mx-6 sm:-mx-8 lg:-mx-12 px-4 sm:px-8 lg:px-12 -mt-16 pt-14 min-h-screen"
      x-data="{
          loading: true,
          error: false,
@@ -454,13 +455,13 @@ gift-row label { cursor: pointer; display: flex; align-items: center; gap: 8px; 
 
                                     {{-- Price --}}
                                     <div class="flex items-baseline flex-wrap gap-2">
-                                        <span class="cart-serif text-2xl font-bold text-[#c9973f]" x-text="fmt(item.price)"></span>
+                                        <span class="cart-serif text-2xl font-bold text-[#B88A44]" x-text="fmt(item.price)"></span>
                                         <span class="text-[13px] text-gray-400 line-through" x-text="fmt(item.original_price || item.price * 1.1)"></span>
                                         <span class="tag-save" x-text="'Save ' + fmt(Math.abs((item.original_price || item.price*1.1) - item.price))"></span>
                                     </div>
 
                                     {{-- Actions row --}}
-                                    <div class="flex flex-wrap items-center gap-5 pt-4 border-t border-[#e8e6e1]">
+                                    <div class="flex flex-wrap items-center gap-5 pt-4 border-t border-[#EAEAEA]">
 
                                         {{-- Qty stepper --}}
                                         <div class="qty-control">
@@ -478,7 +479,7 @@ gift-row label { cursor: pointer; display: flex; align-items: center; gap: 8px; 
                                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                                             Save for later
                                         </button>
-                                        <span class="text-[#e8e6e1] text-lg font-thin">|</span>
+                                        <span class="text-[#EAEAEA] text-lg font-thin">|</span>
                                         <button class="action-link danger" @click="removeItem(item.id)">
                                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                                             Remove
@@ -486,18 +487,18 @@ gift-row label { cursor: pointer; display: flex; align-items: center; gap: 8px; 
 
                                         {{-- Subtotal --}}
                                         <div class="ml-auto text-right">
-                                            <span class="block text-[9px] uppercase tracking-widest font-bold text-[#6b6b76] mb-0.5">Subtotal</span>
-                                            <span class="cart-serif text-[18px] font-bold text-[#1c1c1e]" x-text="fmt(item.price * item.quantity)"></span>
+                                            <span class="block text-[9px] uppercase tracking-widest font-bold text-[#6B7280] mb-0.5">Subtotal</span>
+                                            <span class="cart-serif text-[18px] font-bold text-[#111827]" x-text="fmt(item.price * item.quantity)"></span>
                                         </div>
                                     </div>
 
                                     {{-- Gift wrap --}}
                                     <div class="gift-row">
                                         <label :for="'gift-' + item.id" class="flex items-center gap-2 cursor-pointer">
-                                            <input type="checkbox" :id="'gift-' + item.id" x-model="giftWrap[item.id]" class="h-4 w-4 rounded border-[#d0cec9] accent-[#c9973f]">
-                                            <span>🎁 Premium Gift Wrapping <span class="text-[#c9973f] font-bold">(+{{ '₹150.00' }})</span></span>
+                                            <input type="checkbox" :id="'gift-' + item.id" x-model="giftWrap[item.id]" class="h-4 w-4 rounded border-[#d0cec9] accent-[#B88A44]">
+                                            <span>🎁 Premium Gift Wrapping <span class="text-[#B88A44] font-bold">(+{{ '₹150.00' }})</span></span>
                                         </label>
-                                        <span x-show="giftWrap[item.id]" class="text-[#c9973f] font-bold text-xs" x-text="fmt(150 * item.quantity)"></span>
+                                        <span x-show="giftWrap[item.id]" class="text-[#B88A44] font-bold text-xs" x-text="fmt(150 * item.quantity)"></span>
                                     </div>
                                 </div>
                             </div>
@@ -575,28 +576,28 @@ gift-row label { cursor: pointer; display: flex; align-items: center; gap: 8px; 
                         {{-- ── Promo Code ── --}}
                         <div class="cart-card p-6 space-y-4">
                             <div class="flex items-center gap-2 mb-1">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c9973f" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                                <span class="text-[11px] font-bold uppercase tracking-widest text-[#1c1c1e]">Promo Code</span>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B88A44" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                                <span class="text-[11px] font-bold uppercase tracking-widest text-[#111827]">Promo Code</span>
                             </div>
 
-                            <div class="flex gap-2">
-                                <input x-model="couponCode" type="text" placeholder="Enter coupon code..." class="coupon-input" @keydown.enter="applyCoupon()">
-                                <button @click="applyCoupon()" class="shrink-0 h-[42px] px-5 rounded-xl border-2 border-[#c9973f] text-[#c9973f] text-[11px] font-bold uppercase tracking-wider hover:bg-[#c9973f] hover:text-white transition-all duration-200">Apply</button>
-                            </div>
+                             <div class="flex gap-2">
+                                 <input x-model="couponCode" type="text" placeholder="Enter coupon code..." class="coupon-input" @keydown.enter="applyCoupon()">
+                                 <button @click="applyCoupon()" class="shrink-0 h-[42px] px-5 rounded-xl border-2 border-[#B88A44] text-[#B88A44] text-[11px] font-bold uppercase tracking-wider hover:bg-[#B88A44] hover:text-white transition-all duration-200">Apply</button>
+                             </div>
 
-                            <div class="flex flex-wrap gap-2">
-                                <button @click="selectCoupon('SHOPME20')" class="coupon-chip">SHOPME20 · 20% Off</button>
-                                <button @click="selectCoupon('GOLD1000')" class="coupon-chip">GOLD1000 · ₹1,000 Off</button>
-                            </div>
+                             <div class="flex flex-wrap gap-2">
+                                 <button @click="selectCoupon('SHOPME20')" class="coupon-chip">SHOPME20 · 20% Off</button>
+                                 <button @click="selectCoupon('GOLD1000')" class="coupon-chip">GOLD1000 · ₹1,000 Off</button>
+                             </div>
 
-                            {{-- Success alert --}}
-                            <div x-show="couponSuccess" class="slide-down flex items-center justify-between gap-3 bg-[#edf7f1] border border-[#2f9e5b]/30 rounded-xl px-4 py-3" style="display:none;">
-                                <div class="flex items-center gap-2 text-[11px] font-semibold text-[#2f9e5b]">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-                                    <span x-text="couponSuccess"></span>
-                                </div>
-                                <button @click="removeCoupon()" class="text-[#6b6b76] hover:text-red-500 font-bold text-base leading-none">×</button>
-                            </div>
+                             {{-- Success alert --}}
+                             <div x-show="couponSuccess" class="slide-down flex items-center justify-between gap-3 bg-[#edf7f1] border border-[#2f9e5b]/30 rounded-xl px-4 py-3" style="display:none;">
+                                 <div class="flex items-center gap-2 text-[11px] font-semibold text-[#2f9e5b]">
+                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                                     <span x-text="couponSuccess"></span>
+                                 </div>
+                                 <button @click="removeCoupon()" class="text-[#6B7280] hover:text-red-500 font-bold text-base leading-none">×</button>
+                             </div>
 
                             {{-- Error alert --}}
                             <div x-show="couponError" class="slide-down flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-[11px] font-semibold text-red-600" style="display:none;">

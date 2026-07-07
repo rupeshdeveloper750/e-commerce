@@ -3,7 +3,7 @@
 @section('title', 'The Collection - Shop')
 
 @section('content')
-<div class="bg-white -mx-6 sm:-mx-8 lg:-mx-12 -mt-40 -mb-16 py-12 md:py-16 min-h-screen pt-40 px-6 sm:px-8 lg:px-12"
+<div class="bg-white -mx-6 sm:-mx-8 lg:-mx-12 -mt-5 -mb-16 py-2 md:py-4 min-h-screen pt-14 px-6 sm:px-8 lg:px-12"
      x-data="{ 
         mobileFiltersOpen: false,
         gridCols: 4
@@ -11,24 +11,7 @@
     
     <div class="max-w-[1500px] mx-auto space-y-8">
         
-        {{-- Breadcrumbs & Header --}}
-        <header class="space-y-4">
-            <nav class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold" aria-label="Breadcrumb">
-                <a href="{{ route('store.home') }}" class="hover:text-[#B88A44] transition-colors">Home</a>
-                <span class="mx-1.5">&bull;</span>
-                <span class="text-gray-600">Shop</span>
-            </nav>
-            
-            <div class="space-y-1">
-                <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-[#111827] tracking-tight uppercase">
-                    @if(request('category'))
-                        {{ ucwords(str_replace('-', ' ', is_array(request('category')) ? implode(', ', request('category')) : request('category'))) }}
-                    @else
-                        Shop
-                    @endif
-                </h1>
-            </div>
-        </header>
+        {{-- Header and Breadcrumbs removed --}}
 
         {{-- Category Pills Strip --}}
         <x-shop.category-strip :categories="$categories" />

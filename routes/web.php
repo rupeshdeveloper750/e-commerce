@@ -60,3 +60,17 @@ use App\Http\Controllers\Front\Newsletter\NewsletterController;
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'store'])->name('newsletter.subscribe');
 
 require __DIR__.'/auth.php';
+
+Route::get('/create-symlink', function () {
+    $target = storage_path('app/public');
+    $link = public_path('storage');
+    
+    if (file_exists($link)) {
+        return 'Storage link already exists: ' . $link;
+    }
+    
+    if (symlink($target, $link)) {
+        return 'Storage symlink created successfully!';
+    }
+    return 'Failed to create storage symlink.';
+});

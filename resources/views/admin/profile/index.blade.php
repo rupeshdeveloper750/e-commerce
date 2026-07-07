@@ -51,8 +51,8 @@
             <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                 {{-- Avatar --}}
                 <div class="relative w-24 h-24">
-                    @if($admin->profile_photo)
-                        <img src="{{ Storage::url($admin->profile_photo) }}" alt="{{ $admin->name }}"
+                    @if($admin->profile_photo && (file_exists(public_path('storage/' . $admin->profile_photo)) || filter_var($admin->profile_photo, FILTER_VALIDATE_URL)))
+                        <img src="{{ Str::startsWith($admin->profile_photo, 'http') ? $admin->profile_photo : asset('storage/' . $admin->profile_photo) }}" alt="{{ $admin->name }}"
                              class="w-24 h-24 rounded-2xl border-4 border-[#111827] object-cover shadow-xl">
                     @else
                         <img src="https://ui-avatars.com/api/?name={{ urlencode($admin->name) }}&background=B88A44&color=fff&size=128"
@@ -203,20 +203,34 @@
               capturePhoto() {
                   const video = this.$refs.video;
                   const canvas = this.$refs.canvas;
-                  canvas.width = video.videoWidth;
-                  canvas.height = video.videoHeight;
+                  // Resize down the high resolution phone cameras to standard avatar sizes (max 800px)
+                  let width = video.videoWidth;
+                  let height = video.videoHeight;
+                  const maxDim = 800;
+                  if (width > maxDim || height > maxDim) {
+                      if (width > height) {
+                          height = Math.round((height * maxDim) / width);
+                          width = maxDim;
+                      } else {
+                          width = Math.round((width * maxDim) / height);
+                          height = maxDim;
+                      }
+                  }
+                  
+                  canvas.width = width;
+                  canvas.height = height;
                   const ctx = canvas.getContext('2d');
                   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
+ 
                   canvas.toBlob((blob) => {
                       const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
                       const dt = new DataTransfer();
                       dt.items.add(file);
                       this.$refs.avatarInput.files = dt.files;
-
+ 
                       this.preview = URL.createObjectURL(blob);
                       this.closeCamera();
-                  }, 'image/jpeg', 0.9);
+                  }, 'image/jpeg', 0.7); // Compress quality to 70% (reduces size from 6MB to ~150KB)
               }
           }"
           @submit="closeCamera()">
@@ -236,8 +250,8 @@
                 <img :src="preview" class="w-24 h-24 rounded-2xl object-cover border-4 border-slate-700 shadow-xl">
             </div>
             <div x-show="preview === null" class="mb-4">
-                @if($admin->profile_photo)
-                    <img src="{{ Storage::url($admin->profile_photo) }}"
+                @if($admin->profile_photo && (file_exists(public_path('storage/' . $admin->profile_photo)) || filter_var($admin->profile_photo, FILTER_VALIDATE_URL)))
+                    <img src="{{ Str::startsWith($admin->profile_photo, 'http') ? $admin->profile_photo : asset('storage/' . $admin->profile_photo) }}"
                          class="w-24 h-24 rounded-2xl object-cover border-4 border-slate-700 shadow-xl">
                 @else
                     <div class="w-24 h-24 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center">

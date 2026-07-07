@@ -102,49 +102,59 @@
                         ['name' => 'Deals', 'route' => 'store.shop', 'trigger' => 'none'],
                         ['name' => 'About', 'route' => 'store.shop', 'trigger' => 'none']
                     ] as $link)
+                        @php
+                            $isActive = false;
+                            if ($link['name'] === 'Home' && request()->routeIs('store.home')) {
+                                $isActive = true;
+                            } elseif ($link['name'] === 'Shop' && request()->routeIs('store.shop') && !request()->has('category')) {
+                                $isActive = true;
+                            } elseif ($link['name'] === 'Categories' && request()->routeIs('store.shop') && request()->has('category')) {
+                                $isActive = true;
+                            }
+                        @endphp
                         @if($link['trigger'] === 'categories')
                             <div class="relative" @mouseenter="activeMenu = 'categories'" @mouseleave="activeMenu = null">
                                 <a 
                                     href="{{ route($link['route']) }}" 
-                                    class="relative py-2 text-xs font-semibold tracking-widest uppercase text-[#111827] hover:text-[#B88A44] transition duration-200 flex items-center gap-1.5 focus:outline-none"
+                                    class="relative py-2 text-xs font-semibold tracking-widest uppercase {{ $isActive ? 'text-[#B88A44]' : 'text-[#111827]' }} hover:text-[#B88A44] transition duration-200 flex items-center gap-1.5 focus:outline-none"
                                 >
                                     <span>{{ $link['name'] }}</span>
                                     <svg class="w-3 h-3 transition-transform duration-300" :class="activeMenu === 'categories' ? 'rotate-180 text-[#B88A44]' : 'text-gray-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                                     </svg>
-                                    <span class="absolute bottom-0 left-0 w-full h-[2px] bg-[#B88A44] scale-x-0 transition-transform duration-300 origin-left" :class="activeMenu === 'categories' ? 'scale-x-100' : ''"></span>
+                                    <span class="absolute bottom-0 left-0 w-full h-[2px] bg-[#B88A44] scale-x-0 transition-transform duration-300 origin-left" :class="activeMenu === 'categories' || {{ $isActive ? 'true' : 'false' }} ? 'scale-x-100' : ''"></span>
                                 </a>
                             </div>
                         @else
                             <a 
                                 href="{{ route($link['route']) }}" 
-                                class="relative py-2 text-xs font-semibold tracking-widest uppercase text-[#111827] hover:text-[#B88A44] transition duration-200 group"
+                                class="relative py-2 text-xs font-semibold tracking-widest uppercase {{ $isActive ? 'text-[#B88A44]' : 'text-[#111827]' }} hover:text-[#B88A44] transition duration-200 group"
                             >
                                 <span>{{ $link['name'] }}</span>
-                                <span class="absolute bottom-0 left-0 w-full h-[2px] bg-[#B88A44] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
+                                <span class="absolute bottom-0 left-0 w-full h-[2px] bg-[#B88A44] {{ $isActive ? 'scale-x-100' : 'scale-x-0' }} group-hover:scale-x-100 transition-transform duration-300 origin-left"></span>
                             </a>
                         @endif
                     @endforeach
                 </nav>
 
                 {{-- Action Icons (Right) --}}
-                <div class="flex items-center gap-[14px]">
+                <div class="flex items-center gap-[6px] xs:gap-[10px] md:gap-[14px]">
                     {{-- Search Trigger --}}
                     <button 
                         @click="searchOpen = true"
-                        class="w-10 h-10 rounded-full bg-white/70 backdrop-blur-md border border-black/[0.05] flex items-center justify-center text-gray-700 hover:text-[#B88A44] hover:bg-[#FAF9F6] shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:scale-105 hover:rotate-[2deg] transition-all duration-[220ms] focus:outline-none"
+                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/70 backdrop-blur-md border border-black/[0.05] flex items-center justify-center text-gray-700 hover:text-[#B88A44] hover:bg-[#FAF9F6] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-[220ms] focus:outline-none"
                         title="Search Products"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                     </button>
 
                     {{-- Wishlist --}}
                     <a 
                         href="{{ route('user.dashboard') }}" 
-                        class="w-10 h-10 rounded-full bg-white/70 backdrop-blur-md border border-black/[0.05] flex items-center justify-center text-gray-700 hover:text-[#B88A44] hover:bg-[#FAF9F6] shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:scale-105 hover:rotate-[2deg] transition-all duration-[220ms] relative"
+                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/70 backdrop-blur-md border border-black/[0.05] flex items-center justify-center text-gray-700 hover:text-[#B88A44] hover:bg-[#FAF9F6] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-[220ms] relative"
                         title="Wishlist"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
                     </a>
 
                     {{-- Cart Icon (live reactive badge) --}}
@@ -156,24 +166,24 @@
                     @endphp
                     <a 
                         href="{{ route('store.cart') }}" 
-                        class="w-10 h-10 rounded-full bg-white/70 backdrop-blur-md border border-black/[0.05] flex items-center justify-center text-gray-700 hover:text-[#B88A44] hover:bg-[#FAF9F6] shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:scale-105 hover:rotate-[2deg] transition-all duration-[220ms] relative"
+                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/70 backdrop-blur-md border border-black/[0.05] flex items-center justify-center text-gray-700 hover:text-[#B88A44] hover:bg-[#FAF9F6] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-[220ms] relative"
                         title="Shopping Cart"
                         x-data="{ cartCount: {{ $initialCartCount }} }"
                         @cart-count-updated.window="cartCount = $event.detail.count"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                         <span 
                             x-show="cartCount > 0"
                             x-text="cartCount"
-                            class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#B88A44] text-white text-[8px] font-bold flex items-center justify-center shadow-md shadow-[#B88A44]/30 transition-all duration-300"
+                            class="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#B88A44] text-white text-[8px] font-bold flex items-center justify-center shadow-md shadow-[#B88A44]/30 transition-all duration-300"
                             :class="cartCount > 0 ? 'scale-100 opacity-100' : 'scale-0 opacity-0'"
                         ></span>
                     </a>
 
                     {{-- User Account / Login Button --}}
                     @auth
-                        <div x-data="{ open: false }" class="relative ml-[4px]">
-                            <button @click="open = !open" class="w-10 h-10 rounded-full overflow-hidden border border-black/[0.05] hover:border-[#B88A44]/35 hover:scale-105 shadow-sm transition-all duration-[220ms] focus:outline-none">
+                        <div x-data="{ open: false }" class="relative ml-[2px]">
+                            <button @click="open = !open" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border border-black/[0.05] hover:border-[#B88A44]/35 hover:scale-105 shadow-sm transition-all duration-[220ms] focus:outline-none">
                                 <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=B88A44&color=ffffff" class="w-full h-full object-cover" alt="">
                             </button>
                             <div x-show="open" @click.away="open = false" class="absolute right-0 mt-3 w-52 rounded-2xl bg-white border border-[#E5E7EB] shadow-2xl py-2 z-50 text-gray-700 text-sm overflow-hidden" x-cloak>
@@ -192,19 +202,18 @@
                     @else
                         <a 
                             href="{{ route('login') }}" 
-                            class="group/login-btn ml-[4px] inline-flex items-center justify-center h-[42px] px-[22px] rounded-full text-xs font-semibold tracking-[0.3px] uppercase text-white bg-gradient-to-r from-[#B88A44] to-[#A77933] hover:from-[#A77933] hover:to-[#8E6226] ring-1 ring-white/10 ring-inset shadow-md shadow-[#B88A44]/15 hover:shadow-lg hover:shadow-[#B88A44]/25 hover:-translate-y-0.5 transition-all duration-[220ms] overflow-hidden"
+                            class="group/login-btn ml-[2px] inline-flex items-center justify-center h-9 sm:h-[42px] px-3 sm:px-[22px] rounded-full text-[10px] sm:text-xs font-semibold tracking-[0.3px] uppercase text-white bg-gradient-to-r from-[#B88A44] to-[#A77933] hover:from-[#A77933] hover:to-[#8E6226] ring-1 ring-white/10 ring-inset shadow-md shadow-[#B88A44]/15 hover:shadow-lg transition-all duration-[220ms] overflow-hidden"
                         >
-                            <span class="transform group-hover/login-btn:-translate-x-1 transition-transform duration-200">Login</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right w-0 opacity-0 group-hover/login-btn:w-3.5 group-hover/login-btn:opacity-100 transform translate-x-2 group-hover/login-btn:translate-x-0.5 transition-all duration-200"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                            <span>Login</span>
                         </a>
                     @endauth
 
                     {{-- Mobile Toggle --}}
                     <button 
                         @click="mobileOpen = true"
-                        class="w-10 h-10 rounded-full flex lg:hidden items-center justify-center text-gray-700 hover:text-[#B88A44] hover:bg-[#FAF9F6] border border-black/[0.05] hover:border-[#B88A44]/35 hover:-translate-y-0.5 hover:scale-105 transition duration-[220ms] focus:outline-none"
+                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex lg:hidden items-center justify-center text-gray-700 hover:text-[#B88A44] hover:bg-[#FAF9F6] border border-black/[0.05] hover:border-[#B88A44]/35 hover:-translate-y-0.5 transition duration-[220ms] focus:outline-none"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
                     </button>
                 </div>
 
