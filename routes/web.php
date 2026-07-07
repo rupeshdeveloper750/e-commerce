@@ -21,8 +21,15 @@ Route::post('/product/{product}/review', [ProductShowController::class, 'storeRe
 Route::get('/cart', [CartController::class, 'index'])->name('store.cart');
 Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('store.cart.add');
 Route::post('/cart/update/{id}', [CartController::class, 'update'])->name('store.cart.update');
-// Using GET for removal simplicity in frontend template links
 Route::get('/cart/remove/{id}', [CartController::class, 'remove'])->name('store.cart.remove');
+
+// Dynamic DB API Cart Endpoints
+Route::get('/api/cart', [CartController::class, 'apiGet'])->name('api.cart.get');
+Route::patch('/api/cart/{id}', [CartController::class, 'apiUpdate'])->name('api.cart.update');
+Route::delete('/api/cart/{id}', [CartController::class, 'apiRemove'])->name('api.cart.remove');
+Route::post('/api/cart/save-later/{id}', [CartController::class, 'apiSaveLater'])->name('api.cart.saveLater');
+Route::post('/api/cart/move-bag/{id}', [CartController::class, 'apiMoveToBag'])->name('api.cart.moveToBag');
+Route::post('/api/cart/apply-coupon', [CartController::class, 'apiApplyCoupon'])->name('api.cart.applyCoupon');
 
 // Checkout (auth protected)
 Route::middleware('auth')->group(function () {

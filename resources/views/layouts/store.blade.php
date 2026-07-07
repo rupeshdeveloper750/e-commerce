@@ -147,19 +147,27 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
                     </a>
 
-                    {{-- Cart Icon --}}
+                    {{-- Cart Icon (live reactive badge) --}}
+                    @php
+                        $cartQuery = auth()->check() 
+                            ? \App\Models\CartItem::where('user_id', auth()->id()) 
+                            : \App\Models\CartItem::where('session_id', session()->getId());
+                        $initialCartCount = $cartQuery->where('is_saved', false)->count();
+                    @endphp
                     <a 
                         href="{{ route('store.cart') }}" 
                         class="w-10 h-10 rounded-full bg-white/70 backdrop-blur-md border border-black/[0.05] flex items-center justify-center text-gray-700 hover:text-[#B88A44] hover:bg-[#FAF9F6] shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:scale-105 hover:rotate-[2deg] transition-all duration-[220ms] relative"
                         title="Shopping Cart"
+                        x-data="{ cartCount: {{ $initialCartCount }} }"
+                        @cart-count-updated.window="cartCount = $event.detail.count"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                        @php $cartCount = count(session()->get('cart', [])); @endphp
-                        @if($cartCount > 0)
-                            <span class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#B88A44] text-white text-[8px] font-bold flex items-center justify-center shadow-md shadow-[#B88A44]/30 animate-pulse">
-                                {{ $cartCount }}
-                            </span>
-                        @endif
+                        <span 
+                            x-show="cartCount > 0"
+                            x-text="cartCount"
+                            class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#B88A44] text-white text-[8px] font-bold flex items-center justify-center shadow-md shadow-[#B88A44]/30 transition-all duration-300"
+                            :class="cartCount > 0 ? 'scale-100 opacity-100' : 'scale-0 opacity-0'"
+                        ></span>
                     </a>
 
                     {{-- User Account / Login Button --}}

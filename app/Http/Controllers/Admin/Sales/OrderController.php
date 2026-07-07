@@ -53,6 +53,18 @@ class OrderController extends Controller
             ->with('success', 'Order status updated successfully.');
     }
 
+    public function destroy($id)
+    {
+        Gate::authorize('manage-orders');
+
+        $order = Order::findOrFail($id);
+        $this->orderService->destroy($order);
+
+        return redirect()
+            ->route('admin.orders.index')
+            ->with('success', 'Order soft-deleted successfully.');
+    }
+
     public function restore($id)
     {
         Gate::authorize('manage-orders');

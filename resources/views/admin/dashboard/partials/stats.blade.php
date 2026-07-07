@@ -54,15 +54,15 @@
         </div>
 
         <div class="mt-5 flex items-end justify-between">
-            <div>
-                <h2 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+            <div class="min-w-0 flex-1">
+                <h2 class="truncate text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white 2xl:text-3xl" title="{{ $card['value'] }}">
                     {{ $card['value'] }}
                 </h2>
                 <p class="mt-2 text-xs text-gray-400 dark:text-slate-500">
                     Compared to last month
                 </p>
             </div>
-            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-50 dark:bg-slate-800/80 border border-gray-100 dark:border-slate-700/50 shadow-inner">
+            <div class="ml-4 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gray-50 border border-gray-100 shadow-inner dark:border-slate-700/50 dark:bg-slate-800/80">
                 {!! $card['icon'] !!}
             </div>
         </div>

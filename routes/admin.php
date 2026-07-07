@@ -31,11 +31,11 @@ use App\Http\Controllers\Admin\Sales\SupportController;
         ->name('admin.login.store');
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-    ->middleware('auth:admin')
+    ->middleware('auth.admin')
     ->name('admin.logout');
 
 
-Route::middleware('auth:admin')->group(function () {
+Route::middleware('auth.admin')->group(function () {
 
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');
 
@@ -117,7 +117,7 @@ Route::middleware('auth:admin')->group(function () {
         ->name('admin.orders.export');
 
     Route::resource('orders', OrderController::class)
-        ->only(['index', 'show', 'update'])
+        ->only(['index', 'show', 'update', 'destroy'])
         ->names('admin.orders');
 
     Route::resource('roles', RoleController::class)

@@ -25,9 +25,15 @@ class AppServiceProvider extends ServiceProvider
         try {
             if (Schema::hasTable('permissions')) {
                 Gate::before(function ($user, $ability) {
+                    // Support both web guard users and admin guard users
                     if (method_exists($user, 'hasRole') && $user->hasRole('super-admin')) {
                         return true;
                     }
+                });
+
+                // Also gate-check using admin guard user when web user is null
+                Gate::guessPolicyNamesUsing(function ($modelClass) {
+                    return null; // No policies, only gates
                 });
 
                 foreach (\App\Models\Permission::all() as $permission) {

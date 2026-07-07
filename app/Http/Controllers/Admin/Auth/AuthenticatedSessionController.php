@@ -21,7 +21,9 @@ class AuthenticatedSessionController extends Controller
 
         if (auth()->guard('admin')->attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended(route('admin.dashboard'));
+            // Flush any stale intended URL (e.g. from Breeze/web guard)
+            $request->session()->forget('url.intended');
+            return redirect()->route('admin.dashboard');
         }
 
         return back()->withErrors([

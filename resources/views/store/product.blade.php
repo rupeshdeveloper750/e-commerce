@@ -11,8 +11,24 @@ $isElectronics = str_contains($catSlug, 'electronics') || str_contains($catSlug,
 $isShoes = str_contains($catSlug, 'shoe') || str_contains($catSlug, 'footwear') || str_contains($parentSlug, 'shoe') || str_contains($parentSlug, 'footwear');
 $isBags = str_contains($catSlug, 'bag') || str_contains($parentSlug, 'bag');
 $isFurniture = str_contains($catSlug, 'furniture') || str_contains($parentSlug, 'furniture');
-// Default to Fashion if none of the above matches
 $isFashion = !$isElectronics && !$isShoes && !$isBags && !$isFurniture;
+
+$productAttributes = [];
+if ($product->variants) {
+    foreach ($product->variants as $variant) {
+        foreach ($variant->attributeValues as $av) {
+            if (!$av->attribute) continue;
+            $attrName = strtolower($av->attribute->name);
+            if (!isset($productAttributes[$attrName])) {
+                $productAttributes[$attrName] = [];
+            }
+            $productAttributes[$attrName][$av->id] = [
+                'id' => $av->id,
+                'value' => $av->value
+            ];
+        }
+    }
+}
 @endphp
 
 <div class="bg-white -mx-6 sm:-mx-8 lg:-mx-12 -mt-40 -mb-16 py-12 md:py-16 min-h-screen pt-40 px-6 sm:px-8 lg:px-12"
@@ -22,13 +38,69 @@ $isFashion = !$isElectronics && !$isShoes && !$isBags && !$isFurniture;
         quantity: 1,
         maxQuantity: {{ $product->quantity }},
         wishlisted: false,
-        sizeSelected: '',
-        colorSelected: '',
-        storageSelected: '',
-        ramSelected: '',
-        widthSelected: '',
-        fitSelected: '',
-        capacitySelected: ''
+        
+        selectedAttributes: {},
+        
+        variants: @js($product->variants->map(function($v) {
+            return [
+                'id' => $v->id,
+                'sku' => $v->sku,
+                'price' => (float)$v->price,
+                'sale_price' => $v->sale_price ? (float)$v->sale_price : null,
+                'quantity' => $v->quantity,
+                'attributes' => $v->attributeValues->mapWithKeys(function($av) {
+                    return [strtolower($av->attribute->name) => strtolower($av->value)];
+                })->toArray()
+            ];
+        })),
+        
+        get selectedVariant() {
+            if (!this.variants || this.variants.length === 0) return null;
+            return this.variants.find(v => {
+                return Object.entries(this.selectedAttributes).every(([attrName, value]) => {
+                    return !value || v.attributes[attrName] === value;
+                });
+            });
+        },
+        
+        get currentPrice() {
+            const v = this.selectedVariant;
+            if (v) {
+                return v.sale_price ? v.sale_price : v.price;
+            }
+            return {{ $product->sale_price ? $product->sale_price : $product->price }};
+        },
+        
+        get originalPrice() {
+            const v = this.selectedVariant;
+            if (v) {
+                return v.sale_price ? v.price : null;
+            }
+            return {{ $product->sale_price ? $product->price : 'null' }};
+        },
+        
+        get saveAmount() {
+            const op = this.originalPrice;
+            const cp = this.currentPrice;
+            if (op && op > cp) {
+                return op - cp;
+            }
+            return null;
+        },
+        
+        formatPrice(amount) {
+            if (!amount) return '';
+            return '₹' + Number(amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        },
+        
+        init() {
+            if (this.variants && this.variants.length > 0) {
+                const firstVariant = this.variants[0];
+                Object.entries(firstVariant.attributes).forEach(([key, val]) => {
+                    this.selectedAttributes[key] = val;
+                });
+            }
+        }
      }">
 
     <div class="max-w-[1500px] mx-auto space-y-16">
@@ -121,13 +193,33 @@ $isFashion = !$isElectronics && !$isShoes && !$isBags && !$isFurniture;
                     <div class="space-y-1">
                         <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Price</span>
                         <div class="flex items-baseline gap-2.5">
-                            @if($product->sale_price)
-                            <span class="font-serif text-2xl sm:text-3xl font-bold text-[#B88A44]">₹{{ number_format($product->sale_price, 2) }}</span>
-                            <span class="text-sm text-gray-400 line-through">₹{{ number_format($product->price, 2) }}</span>
-                            <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Save ₹{{ number_format($product->price - $product->sale_price, 0) }}</span>
-                            @else
-                            <span class="font-serif text-2xl sm:text-3xl font-bold text-[#111827]">₹{{ number_format($product->price, 2) }}</span>
-                            @endif
+                            {{-- Dynamic pricing for products with variants --}}
+                            <template x-if="variants.length > 0">
+                                <div class="flex items-baseline gap-2.5">
+                                    <span class="font-serif text-2xl sm:text-3xl font-bold text-[#B88A44]" x-text="formatPrice(currentPrice)"></span>
+                                    <template x-if="originalPrice">
+                                        <span class="text-sm text-gray-400 line-through" x-text="formatPrice(originalPrice)"></span>
+                                    </template>
+                                    <template x-if="saveAmount">
+                                        <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                            Save <span x-text="formatPrice(saveAmount)"></span>
+                                        </span>
+                                    </template>
+                                </div>
+                            </template>
+                            
+                            {{-- Fallback static pricing when no variants exist --}}
+                            <template x-if="variants.length === 0">
+                                <div class="flex items-baseline gap-2.5">
+                                    @if($product->sale_price)
+                                    <span class="font-serif text-2xl sm:text-3xl font-bold text-[#B88A44]">₹{{ number_format($product->sale_price, 2) }}</span>
+                                    <span class="text-sm text-gray-400 line-through">₹{{ number_format($product->price, 2) }}</span>
+                                    <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Save ₹{{ number_format($product->price - $product->sale_price, 0) }}</span>
+                                    @else
+                                    <span class="font-serif text-2xl sm:text-3xl font-bold text-[#111827]">₹{{ number_format($product->price, 2) }}</span>
+                                    @endif
+                                </div>
+                            </template>
                         </div>
                         <span class="text-[10px] text-gray-400 font-medium block">All taxes included. EMI starting at ₹3,400/month.</span>
                     </div>
@@ -163,179 +255,62 @@ $isFashion = !$isElectronics && !$isShoes && !$isBags && !$isFurniture;
                 @if($product->quantity > 0)
                 <div class="space-y-4 pt-2">
 
-                    {{-- DYNAMIC VARIANT OPTION SELECTORS DEPENDING ON PRODUCT CATEGORY --}}
-
-                    {{-- 1. Electronics variants --}}
-                    @if($isElectronics)
+                    {{-- DYNAMIC VARIANT OPTION SELECTORS FROM DATABASE --}}
+                    @if(count($productAttributes) > 0)
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-[#EAEAEA] pb-4">
-                        {{-- Color finish --}}
+                        @foreach($productAttributes as $attrName => $values)
                         <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Select Finish</label>
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Select {{ ucfirst($attrName) }}</label>
+                            
+                            {{-- Color / Wood Stain Color Swatches --}}
+                            @if(str_contains($attrName, 'color') || str_contains($attrName, 'finish') || str_contains($attrName, 'stain'))
                             <div class="flex items-center gap-2">
-                                @foreach(['silver' => '#E5E7EB', 'space-gray' => '#4B5563', 'gold' => '#F59E0B'] as $name => $hex)
+                                @foreach($values as $valKey => $valData)
+                                @php
+                                    $colorMap = [
+                                        'silver' => '#E5E7EB',
+                                        'space-gray' => '#4B5563',
+                                        'gold' => '#F59E0B',
+                                        'cream' => '#F3EFE9',
+                                        'tan' => '#D2B48C',
+                                        'dark' => '#1F2937',
+                                        'black' => '#111827',
+                                        'brown' => '#78350F',
+                                        'white' => '#F9FAFB',
+                                        'natural' => '#EAE0D5',
+                                        'walnut' => '#5C4033',
+                                        'matte-black' => '#1F2937',
+                                        'olive' => '#3F6212'
+                                    ];
+                                    $hex = $colorMap[strtolower($valData['value'])] ?? '#CCCCCC';
+                                @endphp
                                 <button
-                                    @click="colorSelected = '{{ $name }}'"
+                                    @click="selectedAttributes['{{ $attrName }}'] = '{{ strtolower($valData['value']) }}'"
                                     type="button"
                                     class="w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none"
-                                    :class="colorSelected === '{{ $name }}' ? 'border-[#B88A44] ring-2 ring-[#B88A44]/10 scale-105' : 'border-gray-200 hover:scale-105'"
-                                    title="{{ ucfirst($name) }}">
-                                    <span class="w-6 h-6 rounded-full block" :style="{ backgroundColor: '{{ $hex }}' }"></span>
+                                    :class="selectedAttributes['{{ $attrName }}'] === '{{ strtolower($valData['value']) }}' ? 'border-[#B88A44] ring-2 ring-[#B88A44]/10 scale-105' : 'border-gray-200 hover:scale-105'"
+                                    title="{{ ucfirst($valData['value']) }}">
+                                    <span class="w-6 h-6 rounded-full block" style="background-color: {{ $hex }}"></span>
                                 </button>
                                 @endforeach
                             </div>
-                        </div>
-
-                        {{-- Storage --}}
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Select Storage</label>
-                            <div class="flex items-center gap-2">
-                                @foreach(['128GB', '256GB', '512GB'] as $st)
+                            
+                            {{-- Size / Storage Buttons --}}
+                            @else
+                            <div class="flex items-center gap-2 flex-wrap">
+                                @foreach($values as $valKey => $valData)
                                 <button
-                                    @click="storageSelected = '{{ $st }}'"
+                                    @click="selectedAttributes['{{ $attrName }}'] = '{{ strtolower($valData['value']) }}'"
                                     type="button"
                                     class="px-3.5 h-9 rounded-lg border text-xs font-bold transition-all focus:outline-none"
-                                    :class="storageSelected === '{{ $st }}' ? 'bg-[#111827] text-white border-transparent' : 'bg-white text-gray-700 border-gray-200 hover:border-black'">
-                                    {{ $st }}
+                                    :class="selectedAttributes['{{ $attrName }}'] === '{{ strtolower($valData['value']) }}' ? 'bg-[#111827] text-white border-transparent' : 'bg-white text-gray-700 border-gray-200 hover:border-black'">
+                                    {{ $valData['value'] }}
                                 </button>
                                 @endforeach
                             </div>
+                            @endif
                         </div>
-                    </div>
-                    @endif
-
-                    {{-- 2. Fashion Clothing variants --}}
-                    @if($isFashion)
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-[#EAEAEA] pb-4">
-                        {{-- Color --}}
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Select Color</label>
-                            <div class="flex items-center gap-2">
-                                @foreach(['cream' => '#F3EFE9', 'tan' => '#D2B48C', 'dark' => '#1F2937'] as $name => $hex)
-                                <button
-                                    @click="colorSelected = '{{ $name }}'"
-                                    type="button"
-                                    class="w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none"
-                                    :class="colorSelected === '{{ $name }}' ? 'border-[#B88A44] ring-2 ring-[#B88A44]/10 scale-105' : 'border-gray-200 hover:scale-105'"
-                                    title="{{ ucfirst($name) }}">
-                                    <span class="w-6 h-6 rounded-full block" :style="{ backgroundColor: '{{ $hex }}' }"></span>
-                                </button>
-                                @endforeach
-                            </div>
-                        </div>
-
-                        {{-- Size --}}
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Select Size</label>
-                            <div class="flex items-center gap-1.5">
-                                @foreach(['XS', 'S', 'M', 'L', 'XL', 'XXL'] as $sz)
-                                <button
-                                    @click="sizeSelected = '{{ $sz }}'"
-                                    type="button"
-                                    class="w-8.5 h-8.5 rounded-lg border text-xs font-bold transition-all focus:outline-none"
-                                    :class="sizeSelected === '{{ $sz }}' ? 'bg-[#111827] text-white border-transparent' : 'bg-white text-gray-700 border-gray-200 hover:border-black'">
-                                    {{ $sz }}
-                                </button>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-
-                    {{-- 3. Shoes variants --}}
-                    @if($isShoes)
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-[#EAEAEA] pb-4">
-                        {{-- Color --}}
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Select Color</label>
-                            <div class="flex items-center gap-2">
-                                @foreach(['black' => '#111827', 'brown' => '#78350F', 'white' => '#F9FAFB'] as $name => $hex)
-                                <button
-                                    @click="colorSelected = '{{ $name }}'"
-                                    type="button"
-                                    class="w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none"
-                                    :class="colorSelected === '{{ $name }}' ? 'border-[#B88A44] ring-2 ring-[#B88A44]/10 scale-105' : 'border-gray-200 hover:scale-105'"
-                                    title="{{ ucfirst($name) }}">
-                                    <span class="w-6 h-6 rounded-full block" :style="{ backgroundColor: '{{ $hex }}' }"></span>
-                                </button>
-                                @endforeach
-                            </div>
-                        </div>
-
-                        {{-- Shoe Size --}}
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Select Shoe Size</label>
-                            <div class="flex flex-wrap gap-1.5">
-                                @foreach(['6', '7', '8', '9', '10', '11'] as $sz)
-                                <button
-                                    @click="sizeSelected = '{{ $sz }}'"
-                                    type="button"
-                                    class="w-8.5 h-8.5 rounded-lg border text-xs font-bold transition-all focus:outline-none"
-                                    :class="sizeSelected === '{{ $sz }}' ? 'bg-[#111827] text-white border-transparent' : 'bg-white text-gray-700 border-gray-200 hover:border-black'">
-                                    {{ $sz }}
-                                </button>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-
-                    {{-- 4. Bags variants --}}
-                    @if($isBags)
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-[#EAEAEA] pb-4">
-                        {{-- Color --}}
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Select Finish Color</label>
-                            <div class="flex items-center gap-2">
-                                @foreach(['tan' => '#B45309', 'olive' => '#3F6212', 'black' => '#111827'] as $name => $hex)
-                                <button
-                                    @click="colorSelected = '{{ $name }}'"
-                                    type="button"
-                                    class="w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none"
-                                    :class="colorSelected === '{{ $name }}' ? 'border-[#B88A44] ring-2 ring-[#B88A44]/10 scale-105' : 'border-gray-200 hover:scale-105'"
-                                    title="{{ ucfirst($name) }}">
-                                    <span class="w-6 h-6 rounded-full block" :style="{ backgroundColor: '{{ $hex }}' }"></span>
-                                </button>
-                                @endforeach
-                            </div>
-                        </div>
-
-                        {{-- Capacity --}}
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Select Capacity</label>
-                            <div class="flex items-center gap-2">
-                                @foreach(['15L', '20L', '30L'] as $cp)
-                                <button
-                                    @click="capacitySelected = '{{ $cp }}'"
-                                    type="button"
-                                    class="px-3.5 h-9 rounded-lg border text-xs font-bold transition-all focus:outline-none"
-                                    :class="capacitySelected === '{{ $cp }}' ? 'bg-[#111827] text-white border-transparent' : 'bg-white text-gray-700 border-gray-200 hover:border-black'">
-                                    {{ $cp }}
-                                </button>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-
-                    {{-- 5. Furniture variants --}}
-                    @if($isFurniture)
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-[#EAEAEA] pb-4">
-                        {{-- Color --}}
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Select Wood Stain</label>
-                            <div class="flex items-center gap-2">
-                                @foreach(['natural' => '#EAE0D5', 'walnut' => '#5C4033', 'matte-black' => '#1F2937'] as $name => $hex)
-                                <button
-                                    @click="colorSelected = '{{ $name }}'"
-                                    type="button"
-                                    class="w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-200 focus:outline-none"
-                                    :class="colorSelected === '{{ $name }}' ? 'border-[#B88A44] ring-2 ring-[#B88A44]/10 scale-105' : 'border-gray-200 hover:scale-105'"
-                                    title="{{ ucfirst($name) }}">
-                                    <span class="w-6 h-6 rounded-full block" :style="{ backgroundColor: '{{ $hex }}' }"></span>
-                                </button>
-                                @endforeach
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
                     @endif
 
@@ -343,8 +318,7 @@ $isFashion = !$isElectronics && !$isShoes && !$isBags && !$isFurniture;
                     <form action="{{ route('store.cart.add', $product->id) }}" method="POST" class="flex flex-col sm:flex-row items-stretch gap-4 pt-2">
                         @csrf
                         <input type="hidden" name="quantity" :value="quantity">
-                        <input type="hidden" name="size" :value="sizeSelected">
-                        <input type="hidden" name="color" :value="colorSelected">
+                        <input type="hidden" name="variant_id" :value="selectedVariant ? selectedVariant.id : ''">
 
                         {{-- Stepper input --}}
                         <div class="h-12 w-32 flex items-center border border-gray-200 rounded-xl overflow-hidden bg-white shrink-0 justify-between self-center sm:self-auto">

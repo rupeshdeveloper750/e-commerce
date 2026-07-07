@@ -19,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
 
+    $middleware->alias([
+        'auth.admin' => \App\Http\Middleware\AdminAuthenticate::class,
+    ]);
+
     $middleware->redirectGuestsTo(function (Request $request) {
 
         if ($request->is('admin') || $request->is('admin/*')) {
