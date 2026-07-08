@@ -81,7 +81,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 @foreach($wishlist as $item)
                     @if($item->product)
-                        <div class="group relative rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden hover:border-slate-700 transition duration-300 flex flex-col justify-between">
+                        <div onclick="if(!event.target.closest('.no-card-redirect')){ window.location='{{ route('store.product.show', $item->product->slug) }}' }" class="group relative cursor-pointer rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden hover:border-slate-700 transition duration-300 flex flex-col justify-between">
                             <div>
                                 <div class="aspect-square bg-slate-950 border-b border-slate-850 overflow-hidden relative">
                                     @if($item->product->featuredImage)
@@ -91,7 +91,7 @@
                                     @endif
                                     
                                     {{-- Remove button --}}
-                                    <form action="{{ route('user.wishlist.remove', $item->product_id) }}" method="POST" class="absolute top-3 right-3">
+                                    <form action="{{ route('user.wishlist.remove', $item->product_id) }}" method="POST" class="absolute top-3 right-3 no-card-redirect">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="rounded-full bg-slate-950/80 p-1.5 text-rose-500 hover:bg-rose-500 hover:text-white transition shadow" title="Remove">
@@ -108,7 +108,7 @@
                                     <p class="text-sm font-semibold text-amber-500">₹{{ number_format($item->product->price, 2) }}</p>
                                 </div>
                             </div>
-                            <div class="p-4 pt-0">
+                            <div class="p-4 pt-0 no-card-redirect">
                                 <form action="{{ route('store.cart.add', $item->product_id) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 py-2 text-xs font-semibold text-slate-950 hover:bg-amber-400 transition">

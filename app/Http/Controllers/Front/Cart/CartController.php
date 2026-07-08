@@ -96,6 +96,10 @@ class CartController extends Controller
             ]);
         }
 
+        if ($request->has('buy_now')) {
+            return redirect()->route('store.checkout')->with('success', 'Product added to cart!');
+        }
+
         return redirect()->back()->with('success', 'Product added to cart!');
     }
 

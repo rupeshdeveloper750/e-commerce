@@ -23,6 +23,37 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+        
+        /* Premium Toast Animation Styles */
+        #cart-toast {
+            transition: all 500ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        @media (max-width: 639px) {
+            #cart-toast {
+                top: 1rem !important;
+                left: 1rem !important;
+                right: 1rem !important;
+                bottom: auto !important;
+                transform: translateY(-150%) !important;
+            }
+            #cart-toast.active {
+                transform: translateY(0) !important;
+                opacity: 1 !important;
+            }
+        }
+        @media (min-width: 640px) {
+            #cart-toast {
+                bottom: 1.5rem !important;
+                right: 1.5rem !important;
+                top: auto !important;
+                left: auto !important;
+                transform: translateY(150%) !important;
+            }
+            #cart-toast.active {
+                transform: translateY(0) !important;
+                opacity: 1 !important;
+            }
+        }
         h1, h2, h3, h4, h5, h6, .font-serif {
             font-family: 'Playfair Display', serif;
         }
@@ -99,8 +130,8 @@
                         ['name' => 'Home', 'route' => 'store.home', 'trigger' => 'none'],
                         ['name' => 'Shop', 'route' => 'store.shop', 'trigger' => 'none'],
                         ['name' => 'Categories', 'route' => 'store.shop', 'trigger' => 'categories'],
-                        ['name' => 'Deals', 'route' => 'store.shop', 'trigger' => 'none'],
-                        ['name' => 'About', 'route' => 'store.shop', 'trigger' => 'none']
+                        ['name' => 'Deals', 'route' => 'store.deals', 'trigger' => 'none'],
+                        ['name' => 'About', 'route' => 'store.about', 'trigger' => 'none']
                     ] as $link)
                         @php
                             $isActive = false;
@@ -109,6 +140,10 @@
                             } elseif ($link['name'] === 'Shop' && request()->routeIs('store.shop') && !request()->has('category')) {
                                 $isActive = true;
                             } elseif ($link['name'] === 'Categories' && request()->routeIs('store.shop') && request()->has('category')) {
+                                $isActive = true;
+                            } elseif ($link['name'] === 'Deals' && request()->routeIs('store.deals')) {
+                                $isActive = true;
+                            } elseif ($link['name'] === 'About' && request()->routeIs('store.about')) {
                                 $isActive = true;
                             }
                         @endphp
@@ -535,8 +570,8 @@
                         </div>
                     </div>
 
-                    <a href="{{ route('store.shop') }}" class="block text-base font-semibold text-[#111827] hover:text-[#B88A44] py-1 border-b border-[#E5E7EB]/55">Deals</a>
-                    <a href="{{ route('store.shop') }}" class="block text-base font-semibold text-[#111827] hover:text-[#B88A44] py-1 border-b border-[#E5E7EB]/55">About</a>
+                    <a href="{{ route('store.deals') }}" class="block text-base font-semibold text-[#111827] hover:text-[#B88A44] py-1 border-b border-[#E5E7EB]/55">Deals</a>
+                    <a href="{{ route('store.about') }}" class="block text-base font-semibold text-[#111827] hover:text-[#B88A44] py-1 border-b border-[#E5E7EB]/55">About</a>
                 </nav>
             </div>
 
@@ -588,6 +623,219 @@
 
     {{-- Footer --}}
     <x-footer :footerCategories="$footerCategories" :siteSettings="$siteSettings" />
+
+    {{-- Global Mobile App-Like Bottom Navigation Tab Bar (Flipkart/Meesho style) --}}
+    @php
+        $cartQuery = auth()->check() 
+            ? \App\Models\CartItem::where('user_id', auth()->id()) 
+            : \App\Models\CartItem::where('session_id', session()->getId());
+        $initialCartCount = $cartQuery->where('is_saved', false)->count();
+    @endphp
+    <div class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-stone-150/70 sm:hidden flex items-center justify-around py-2 px-3 shadow-[0_-4px_25px_rgba(0,0,0,0.06)] pb-safe">
+        <a href="{{ route('store.home') }}" class="flex flex-col items-center gap-1 text-stone-500 hover:text-[#B88A44] transition-colors py-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span class="text-[8px] font-bold uppercase tracking-widest">Home</span>
+        </a>
+        <a href="{{ route('store.shop') }}" class="flex flex-col items-center gap-1 text-stone-500 hover:text-[#B88A44] transition-colors py-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <span class="text-[8px] font-bold uppercase tracking-widest">Shop</span>
+        </a>
+        <a href="{{ route('store.cart') }}" 
+           x-data="{ cartCount: {{ $initialCartCount }} }"
+           @cart-count-updated.window="cartCount = $event.detail.count"
+           class="flex flex-col items-center gap-1 text-stone-500 hover:text-[#B88A44] transition-colors py-1 relative">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            <span x-show="cartCount > 0" x-text="cartCount" class="absolute -top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-[#B88A44] text-white text-[8px] font-bold flex items-center justify-center shadow-md"></span>
+            <span class="text-[8px] font-bold uppercase tracking-widest">Bag</span>
+        </a>
+        @auth
+        <a href="{{ route('user.dashboard') }}" class="flex flex-col items-center gap-1 text-stone-500 hover:text-[#B88A44] transition-colors py-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span class="text-[8px] font-bold uppercase tracking-widest">Account</span>
+        </a>
+        @else
+        <a href="{{ route('login') }}" class="flex flex-col items-center gap-1 text-stone-500 hover:text-[#B88A44] transition-colors py-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-in"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+            <span class="text-[8px] font-bold uppercase tracking-widest">Login</span>
+        </a>
+        @endauth
+    </div>
+
+    {{-- Premium Dynamic Cart Notification Toast --}}
+    <div id="cart-toast" class="fixed z-[9999] opacity-0 pointer-events-none max-w-sm w-full mx-auto sm:mx-0">
+        <div class="bg-stone-900/95 backdrop-blur-xl border border-white/10 text-white shadow-[0_24px_60px_rgba(0,0,0,0.35)] rounded-2xl p-4 flex flex-col gap-3 max-w-sm pointer-events-auto relative overflow-hidden min-w-[320px]">
+            
+            <!-- Toast Header -->
+            <div class="flex items-center justify-between border-b border-white/5 pb-2">
+                <div class="flex items-center gap-2">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span class="text-[9px] font-bold uppercase tracking-widest text-emerald-400">Added to Bag</span>
+                </div>
+                <button onclick="hideCartToast()" class="text-white/40 hover:text-white transition-colors focus:outline-none" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Rich Details Layout -->
+            <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 bg-white/5 rounded-xl border border-white/10 overflow-hidden flex items-center justify-center p-1 shrink-0">
+                    <img id="cart-toast-image" src="" alt="Product" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="flex-grow min-w-0">
+                    <p id="cart-toast-brand" class="text-[8px] font-bold text-[#B88A44] uppercase tracking-widest leading-none mb-1">Premium Product</p>
+                    <p id="cart-toast-title" class="text-xs font-semibold truncate text-white">Product Name</p>
+                    <p id="cart-toast-price" class="text-xs font-medium text-white/60 mt-0.5">Price</p>
+                </div>
+            </div>
+
+            <!-- Quick Navigation Shortcuts -->
+            <div class="flex items-center gap-2 pt-1">
+                <a href="{{ route('store.cart') }}" class="flex-1 h-9 rounded-lg bg-[#B88A44] hover:bg-[#A37837] text-white text-[10px] font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+                    View Bag
+                </a>
+                <a href="{{ route('store.checkout') }}" class="flex-1 h-9 rounded-lg bg-white/10 hover:bg-white/20 border border-white/10 text-white text-[10px] font-bold uppercase tracking-wider transition-colors flex items-center justify-center">
+                    Checkout
+                </a>
+            </div>
+
+            <!-- Auto-dismiss animated progress bar -->
+            <div class="absolute bottom-0 left-0 right-0 h-[2.5px] bg-white/5">
+                <div id="cart-toast-progress" class="h-full bg-[#B88A44] w-full origin-left transition-all duration-[4500ms] linear"></div>
+            </div>
+        </div>
+    </div>
+
+    {{-- AJAX Cart Form Interceptor & Toast Controller --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('submit', function(e) {
+                const form = e.target;
+                if (form.action && (form.action.includes('/cart/add/') || form.action.includes('/cart/add'))) {
+                    if (e.submitter && e.submitter.name === 'buy_now') {
+                        return; // Let the form submit natively
+                    }
+                    e.preventDefault();
+                    
+                    const formData = new FormData(form);
+                    const submitBtn = form.querySelector('[type="submit"]');
+                    const originalBtnContent = submitBtn ? submitBtn.innerHTML : '';
+                    
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.style.opacity = '0.75';
+                    }
+                    
+                    fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': formData.get('_token')
+                        },
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response error');
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Update navbar cartCount state
+                            window.dispatchEvent(new CustomEvent('cart-count-updated', { 
+                                detail: { count: data.cart_count } 
+                            }));
+                            
+                            // Show premium rich toast popup
+                            showCartToast(data.message, form);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error adding product to cart:', error);
+                    })
+                    .finally(() => {
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.style.opacity = '1';
+                            submitBtn.innerHTML = originalBtnContent;
+                        }
+                    });
+                }
+            });
+        });
+
+        let toastTimeout;
+        let progressTimeout;
+
+        function showCartToast(message, form) {
+            const toast = document.getElementById('cart-toast');
+            const progress = document.getElementById('cart-toast-progress');
+            
+            // Rich elements
+            const toastImg = document.getElementById('cart-toast-image');
+            const toastBrand = document.getElementById('cart-toast-brand');
+            const toastTitle = document.getElementById('cart-toast-title');
+            const toastPrice = document.getElementById('cart-toast-price');
+            
+            let name = 'Product added to bag';
+            let image = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=150';
+            let price = '';
+            let brand = 'Premium Collection';
+
+            // Scrape data from form context
+            if (form) {
+                const card = form.closest('.group') || form.closest('li') || form.closest('.bg-white') || form.closest('.grid');
+                if (card) {
+                    const imgEl = card.querySelector('img');
+                    const nameEl = card.querySelector('h3') || card.querySelector('h4');
+                    const priceEl = card.querySelector('.font-serif') || card.querySelector('.text-amber-500') || card.querySelector('.font-sans.font-bold');
+                    const brandEl = card.querySelector('span');
+
+                    if (imgEl) image = imgEl.src;
+                    if (nameEl) name = nameEl.textContent.trim();
+                    if (priceEl) price = priceEl.textContent.trim();
+                    if (brandEl) brand = brandEl.textContent.trim();
+                }
+            }
+
+            // Assign variables to popup
+            if (toastImg) toastImg.src = image;
+            if (toastBrand) toastBrand.textContent = brand;
+            if (toastTitle) toastTitle.textContent = name;
+            if (toastPrice) toastPrice.textContent = price;
+
+            if (toast) {
+                // Reset progress bar before animating
+                if (progress) {
+                    progress.style.transition = 'none';
+                    progress.style.width = '100%';
+                    // Trigger reflow to reset
+                    void progress.offsetWidth; 
+                }
+
+                toast.classList.add('active');
+                
+                // Start animating progress bar width to 0
+                if (progress) {
+                    progress.style.transition = 'width 4500ms linear';
+                    progress.style.width = '0%';
+                }
+
+                clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(hideCartToast, 4500);
+            }
+        }
+
+        function hideCartToast() {
+            const toast = document.getElementById('cart-toast');
+            if (toast) {
+                toast.classList.remove('active');
+            }
+        }
+    </script>
 
 </body>
 </html>

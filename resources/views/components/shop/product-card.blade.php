@@ -35,7 +35,7 @@
     }
 @endphp
 
-<div class="group relative flex flex-col justify-between rounded-2xl border border-[#E5E7EB]/60 bg-white p-4 hover:shadow-xl hover:border-transparent transition-all duration-300">
+<div onclick="if(!event.target.closest('.no-card-redirect')){ window.location='{{ route('store.product.show', $product->slug) }}' }" class="group relative cursor-pointer flex flex-col justify-between rounded-2xl border border-[#E5E7EB]/60 bg-white p-4 hover:shadow-xl hover:border-transparent transition-all duration-300">
     <div>
         {{-- Image Wrapper --}}
         <div class="aspect-[4/5] bg-gray-50 rounded-xl overflow-hidden relative border border-gray-150/40">
@@ -54,7 +54,7 @@
             @endif
 
             {{-- Wishlist Toggle --}}
-            <div class="absolute top-3 right-3 z-10" x-data="{ wishlisted: false }">
+            <div class="absolute top-3 right-3 z-10 no-card-redirect" x-data="{ wishlisted: false }">
                 @auth
                     <form action="{{ route('user.wishlist.add', $product->id) }}" method="POST" @submit.prevent="fetch($el.action, {method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}}).then(() => wishlisted = !wishlisted)">
                         @csrf
@@ -79,7 +79,7 @@
             </div>
 
             {{-- Add to Cart Overlay on Hover --}}
-            <div class="absolute inset-x-3 bottom-3 z-10 translate-y-2 opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 transition-all duration-300">
+            <div class="no-card-redirect absolute inset-x-3 bottom-3 z-10 translate-y-2 opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 transition-all duration-300">
                 <form action="{{ route('store.cart.add', $product->id) }}" method="POST">
                     @csrf
                     <button 
@@ -112,10 +112,10 @@
         </div>
 
         {{-- Mobile Add to Cart trigger --}}
-        <div class="lg:hidden">
+        <div class="no-card-redirect lg:hidden">
             <form action="{{ route('store.cart.add', $product->id) }}" method="POST">
                 @csrf
-                <button type="submit" class="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-700 hover:bg-[#B88A44] hover:text-white transition duration-200">
+                <button type="submit" class="w-8 h-8 rounded-lg bg-gray-50 border border-gray-150/40 flex items-center justify-center text-gray-700 hover:bg-[#B88A44] hover:text-white transition duration-200">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                 </button>
             </form>

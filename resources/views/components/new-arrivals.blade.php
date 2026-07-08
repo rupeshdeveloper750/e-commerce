@@ -48,7 +48,7 @@
                         $imgUrl = 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=400';
                     }
                 @endphp
-                <li class="group relative flex flex-col justify-between rounded-2xl border border-[#E5E7EB]/60 bg-white p-4 hover:shadow-xl hover:border-transparent transition-all duration-300">
+                <li onclick="if(!event.target.closest('.no-card-redirect')){ window.location='{{ route('store.product.show', $product->slug) }}' }" class="group relative cursor-pointer flex flex-col justify-between rounded-2xl border border-[#E5E7EB]/60 bg-white p-4 hover:shadow-xl hover:border-transparent transition-all duration-300">
                     
                     {{-- Image Container (CLS Safe) --}}
                     <div class="aspect-[3/4] w-full rounded-xl overflow-hidden relative bg-gray-50 border border-gray-150/40">
@@ -69,7 +69,7 @@
                         </div>
 
                         {{-- Wishlist Toggle --}}
-                        <div class="absolute top-3 right-3 z-10" x-data="{ wishlisted: false }">
+                        <div class="absolute top-3 right-3 z-10 no-card-redirect" x-data="{ wishlisted: false }">
                             @auth
                                 <form action="{{ route('user.wishlist.add', $product->id) }}" method="POST" @submit.prevent="fetch($el.action, {method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}}).then(() => wishlisted = !wishlisted)">
                                     @csrf
@@ -94,7 +94,7 @@
                         </div>
 
                         {{-- Add to Cart Overlay --}}
-                        <div class="absolute inset-x-3 bottom-3 z-10 translate-y-2 opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 transition-all duration-300">
+                        <div class="no-card-redirect absolute inset-x-3 bottom-3 z-10 translate-y-2 opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 transition-all duration-300">
                             <form action="{{ route('store.cart.add', $product->id) }}" method="POST">
                                 @csrf
                                 <button 
@@ -145,7 +145,7 @@
                             </div>
 
                             {{-- Mobile Cart Trigger --}}
-                            <div class="lg:hidden">
+                            <div class="no-card-redirect lg:hidden">
                                 <form action="{{ route('store.cart.add', $product->id) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-700 hover:bg-[#B88A44] hover:text-white transition duration-200">

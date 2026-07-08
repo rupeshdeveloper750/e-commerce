@@ -16,6 +16,25 @@ Route::get('/', [HomeController::class, 'index'])->name('store.home');
 Route::get('/shop', [ShopController::class, 'index'])->name('store.shop');
 Route::get('/product/{slug}', [ProductShowController::class, 'show'])->name('store.product.show');
 Route::post('/product/{product}/review', [ProductShowController::class, 'storeReview'])->name('store.product.review');
+Route::get('/delivery-check', function (\Illuminate\Http\Request $request) {
+    $pincode = $request->get('pincode');
+    if (strlen($pincode) === 6 && is_numeric($pincode)) {
+        return response()->json(['success' => true, 'message' => 'Standard delivery available in 2-4 business days.']);
+    }
+    return response()->json(['success' => false, 'message' => 'Delivery not available to this pincode.']);
+})->name('store.delivery.check');
+
+Route::get('/deals', function () {
+    $products = \App\Models\Product::whereNotNull('sale_price')
+        ->orWhere('is_bestseller', true)
+        ->take(12)
+        ->get();
+    return view('store.deals', compact('products'));
+})->name('store.deals');
+
+Route::get('/about', function () {
+    return view('store.about');
+})->name('store.about');
 
 // Cart
 Route::get('/cart', [CartController::class, 'index'])->name('store.cart');
