@@ -11,15 +11,26 @@
     }
     
     #category-scroll-container {
+        position: sticky;
+        top: 84px; /* Mobile sticky position under the floating header */
+        z-index: 35;
+        background-color: rgba(255, 255, 255, 0.97);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
         display: flex;
         overflow-x: auto;
         border-bottom: 1px solid rgba(243, 244, 246, 0.8);
         scroll-behavior: smooth;
-        max-height: 110px;
+        max-height: 120px;
         transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
                     opacity 0.3s ease, 
                     padding 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
                     border-color 0.3s ease;
+    }
+    @media (min-width: 768px) {
+        #category-scroll-container {
+            top: 96px; /* Desktop sticky position under the floating header */
+        }
     }
 
     .category-circle-item {
@@ -147,7 +158,7 @@
 @endphp
 
 <div id="category-scroll-container" class="w-full no-scrollbar py-3 border-b border-gray-100/60 scroll-smooth cursor-grab active:cursor-grabbing">
-    <div class="flex items-center gap-3.5 sm:gap-6 md:gap-8 w-max px-3">
+    <div class="flex items-center gap-4 sm:gap-6 md:gap-7 w-max px-4">
         {{-- All Collection --}}
         <a href="{{ route('store.shop') }}" class="category-circle-item">
             <div class="category-circle-img-wrap {{ !request('category') ? 'active' : '' }}">
@@ -227,6 +238,33 @@
             const x = e.touches[0].pageX - slider.offsetLeft;
             const walk = (x - startX) * 1.5;
             slider.scrollLeft = scrollLeft - walk;
+        }, { passive: true });
+
+        // Mobile-only: hide category strip on scroll down, show on scroll up
+        let lastScrollY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            const isMobile = window.innerWidth < 768;
+            if (!isMobile) return; // Desktop: always visible, never hide
+
+            const currentScrollY = window.scrollY;
+            if (currentScrollY > 80 && currentScrollY > lastScrollY) {
+                // Scrolling down on mobile → hide strip
+                slider.style.maxHeight = '0px';
+                slider.style.opacity = '0';
+                slider.style.paddingTop = '0px';
+                slider.style.paddingBottom = '0px';
+                slider.style.borderBottomColor = 'transparent';
+                slider.style.pointerEvents = 'none';
+            } else if (currentScrollY < lastScrollY || currentScrollY <= 80) {
+                // Scrolling up on mobile → show strip
+                slider.style.maxHeight = '120px';
+                slider.style.opacity = '1';
+                slider.style.paddingTop = '12px';
+                slider.style.paddingBottom = '12px';
+                slider.style.borderBottomColor = 'rgba(243, 244, 246, 0.8)';
+                slider.style.pointerEvents = 'auto';
+            }
+            lastScrollY = currentScrollY;
         }, { passive: true });
 
     });
