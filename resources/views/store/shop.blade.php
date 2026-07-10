@@ -3,7 +3,7 @@
 @section('title', 'The Collection - Shop')
 
 @section('content')
-<div class="bg-white -mx-6 sm:-mx-8 lg:-mx-12 -mt-12 sm:-mt-20 -mb-16 py-4 md:py-6 min-h-screen pt-4 px-6 sm:px-8 lg:px-12"
+<div class="bg-white -mx-6 sm:-mx-8 lg:-mx-12 -mt-6 sm:-mt-20 -mb-16 py-4 md:py-6 min-h-screen pt-2 sm:pt-4 px-6 sm:px-8 lg:px-12"
      x-data="{ 
         mobileFiltersOpen: false,
         gridCols: 4,

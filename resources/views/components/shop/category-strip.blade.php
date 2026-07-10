@@ -10,27 +10,36 @@
         -webkit-overflow-scrolling: touch; /* iOS momentum scrolling */
     }
     
+    /* Outer sticky wrapper — no overflow clipping */
     #category-scroll-container {
-        position: sticky;
-        top: 84px; /* Mobile sticky position under the floating header */
-        z-index: 35;
-        background-color: rgba(255, 255, 255, 0.97);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        display: flex;
-        overflow-x: auto;
+        width: 100%;
         border-bottom: 1px solid rgba(243, 244, 246, 0.8);
-        scroll-behavior: smooth;
-        max-height: 120px;
-        transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
-                    opacity 0.3s ease, 
-                    padding 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
-                    border-color 0.3s ease;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        will-change: transform, opacity;
+        background-color: #ffffff;
     }
+    /* Tablet + Desktop: sticky below navbar */
     @media (min-width: 768px) {
         #category-scroll-container {
-            top: 96px; /* Desktop sticky position under the floating header */
+            position: sticky;
+            top: 72px;
+            z-index: 40;
+            background-color: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
+    }
+    /* Inner scroll track — overflow-x only, no vertical clipping */
+    .category-inner-scroll {
+        display: flex;
+        overflow-x: auto;
+        overflow-y: visible;
+        scroll-behavior: smooth;
+        padding: 8px 0 10px;
+        cursor: grab;
+    }
+    .category-inner-scroll:active {
+        cursor: grabbing;
     }
 
     .category-circle-item {
@@ -157,115 +166,92 @@
     };
 @endphp
 
-<div id="category-scroll-container" class="w-full no-scrollbar py-3 border-b border-gray-100/60 scroll-smooth cursor-grab active:cursor-grabbing">
-    <div class="flex items-center gap-4 sm:gap-6 md:gap-7 w-max px-4">
-        {{-- All Collection --}}
-        <a href="{{ route('store.shop') }}" class="category-circle-item">
-            <div class="category-circle-img-wrap {{ !request('category') ? 'active' : '' }}">
-                <img src="{{ $getCategoryImage(null) }}" alt="All Collection" class="category-circle-img" loading="lazy" />
-            </div>
-            <span class="category-circle-label {{ !request('category') ? 'active' : '' }}">
-                All Collection
-            </span>
-        </a>
-        
-        @foreach($categories as $cat)
-            @php
-                $isActive = request('category') === $cat->slug || (is_array(request('category')) && in_array($cat->slug, request('category')));
-            @endphp
-            <a href="{{ route('store.shop', ['category' => $cat->slug]) }}" class="category-circle-item">
-                <div class="category-circle-img-wrap {{ $isActive ? 'active' : '' }}">
-                    <img src="{{ $getCategoryImage($cat) }}" alt="{{ $cat->name }}" class="category-circle-img" loading="lazy" />
+<div id="category-scroll-container" class="w-full no-scrollbar">
+    <div class="category-inner-scroll no-scrollbar">
+        <div class="flex items-center gap-4 sm:gap-6 md:gap-7 w-max px-4">
+            {{-- All Collection --}}
+            <a href="{{ route('store.shop') }}" class="category-circle-item">
+                <div class="category-circle-img-wrap {{ !request('category') ? 'active' : '' }}">
+                    <img src="{{ $getCategoryImage(null) }}" alt="All Collection" class="category-circle-img" loading="lazy" />
                 </div>
-                <span class="category-circle-label {{ $isActive ? 'active' : '' }}">
-                    {{ $cat->name }}
+                <span class="category-circle-label {{ !request('category') ? 'active' : '' }}">
+                    All Collection
                 </span>
             </a>
-        @endforeach
+            
+            @foreach($categories as $cat)
+                @php
+                    $isActive = request('category') === $cat->slug || (is_array(request('category')) && in_array($cat->slug, request('category')));
+                @endphp
+                <a href="{{ route('store.shop', ['category' => $cat->slug]) }}" class="category-circle-item">
+                    <div class="category-circle-img-wrap {{ $isActive ? 'active' : '' }}">
+                        <img src="{{ $getCategoryImage($cat) }}" alt="{{ $cat->name }}" class="category-circle-img" loading="lazy" />
+                    </div>
+                    <span class="category-circle-label {{ $isActive ? 'active' : '' }}">
+                        {{ $cat->name }}
+                    </span>
+                </a>
+            @endforeach
+        </div>
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const slider = document.getElementById('category-scroll-container');
+        const outer = document.getElementById('category-scroll-container');
+        const slider = outer ? outer.querySelector('.category-inner-scroll') : null;
         if (!slider) return;
-        
+
         let isDown = false;
         let startX;
         let scrollLeft;
 
-        // Mouse Drag Scrolling
+        // Mouse Drag Scrolling on inner scroll div
         slider.addEventListener('mousedown', (e) => {
             isDown = true;
             startX = e.pageX - slider.offsetLeft;
             scrollLeft = slider.scrollLeft;
             slider.style.scrollBehavior = 'auto';
         });
-        
-        slider.addEventListener('mouseleave', () => {
-            isDown = false;
-            slider.style.scrollBehavior = 'smooth';
-        });
-        
-        slider.addEventListener('mouseup', () => {
-            isDown = false;
-            slider.style.scrollBehavior = 'smooth';
-        });
-        
+        slider.addEventListener('mouseleave', () => { isDown = false; slider.style.scrollBehavior = 'smooth'; });
+        slider.addEventListener('mouseup', () => { isDown = false; slider.style.scrollBehavior = 'smooth'; });
         slider.addEventListener('mousemove', (e) => {
             if (!isDown) return;
             e.preventDefault();
             const x = e.pageX - slider.offsetLeft;
-            const walk = (x - startX) * 1.5;
-            slider.scrollLeft = scrollLeft - walk;
+            slider.scrollLeft = scrollLeft - (x - startX) * 1.5;
         });
 
-        // Touch Swipe Gesture Fallback
+        // Touch Swipe
         slider.addEventListener('touchstart', (e) => {
             isDown = true;
             startX = e.touches[0].pageX - slider.offsetLeft;
             scrollLeft = slider.scrollLeft;
             slider.style.scrollBehavior = 'auto';
         }, { passive: true });
-        
-        slider.addEventListener('touchend', () => {
-            isDown = false;
-            slider.style.scrollBehavior = 'smooth';
-        }, { passive: true });
-        
+        slider.addEventListener('touchend', () => { isDown = false; slider.style.scrollBehavior = 'smooth'; }, { passive: true });
         slider.addEventListener('touchmove', (e) => {
             if (!isDown) return;
-            const x = e.touches[0].pageX - slider.offsetLeft;
-            const walk = (x - startX) * 1.5;
-            slider.scrollLeft = scrollLeft - walk;
+            slider.scrollLeft = scrollLeft - (e.touches[0].pageX - slider.offsetLeft - startX) * 1.5;
         }, { passive: true });
 
-        // Mobile-only: hide category strip on scroll down, show on scroll up
+        // Mobile-only: hide strip on scroll down, show on scroll up
         let lastScrollY = window.scrollY;
         window.addEventListener('scroll', () => {
-            const isMobile = window.innerWidth < 768;
-            if (!isMobile) return; // Desktop: always visible, never hide
-
-            const currentScrollY = window.scrollY;
-            if (currentScrollY > 80 && currentScrollY > lastScrollY) {
-                // Scrolling down on mobile → hide strip
-                slider.style.maxHeight = '0px';
-                slider.style.opacity = '0';
-                slider.style.paddingTop = '0px';
-                slider.style.paddingBottom = '0px';
-                slider.style.borderBottomColor = 'transparent';
-                slider.style.pointerEvents = 'none';
-            } else if (currentScrollY < lastScrollY || currentScrollY <= 80) {
-                // Scrolling up on mobile → show strip
-                slider.style.maxHeight = '120px';
-                slider.style.opacity = '1';
-                slider.style.paddingTop = '12px';
-                slider.style.paddingBottom = '12px';
-                slider.style.borderBottomColor = 'rgba(243, 244, 246, 0.8)';
-                slider.style.pointerEvents = 'auto';
+            if (window.innerWidth >= 768) return; // Desktop/tablet: always sticky, never hide
+            const y = window.scrollY;
+            if (y > 80 && y > lastScrollY) {
+                outer.style.transform = 'translateY(-110%)';
+                outer.style.opacity = '0';
+                outer.style.pointerEvents = 'none';
+            } else if (y < lastScrollY || y <= 80) {
+                outer.style.transform = 'translateY(0)';
+                outer.style.opacity = '1';
+                outer.style.pointerEvents = 'auto';
             }
-            lastScrollY = currentScrollY;
+            lastScrollY = y;
         }, { passive: true });
-
     });
 </script>
+
+
