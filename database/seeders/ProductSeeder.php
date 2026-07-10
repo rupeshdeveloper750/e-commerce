@@ -7,6 +7,9 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\Category;
 use App\Models\Brand;
+use App\Models\ProductVariant;
+use App\Models\Attribute;
+use App\Models\AttributeValue;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
@@ -438,6 +441,149 @@ class ProductSeeder extends Seeder
                         'sort_order' => 1,
                         'is_featured' => false
                     ]);
+                }
+
+                // Generate variants for this product based on its category
+                $parentSlug = strtolower($parentCategory ? $parentCategory->slug : $category->slug);
+                $subSlug = strtolower($category->slug);
+                
+                $colors = [];
+                $sizes = [];
+                $storages = [];
+                $capacities = [];
+                
+                if (str_contains($parentSlug, 'fashion')) {
+                    $sizes = ['S', 'M', 'L'];
+                    $colors = ['black', 'white', 'olive'];
+                } elseif (str_contains($parentSlug, 'electronics')) {
+                    if ($subSlug === 'headphones') {
+                        $colors = ['black', 'silver'];
+                    } else {
+                        $isLaptop = ($subSlug === 'laptops');
+                        $storages = $isLaptop ? ['256GB', '512GB'] : ['128GB', '256GB', '512GB'];
+                        $colors = ['space-gray', 'silver'];
+                    }
+                } elseif (str_contains($parentSlug, 'footwear')) {
+                    $sizes = ['8', '9', '10'];
+                    if ($subSlug === 'sneakers' || $subSlug === 'sports-shoes') {
+                        $colors = ['red', 'green', 'tan'];
+                    } else {
+                        $colors = ['black', 'brown'];
+                    }
+                } elseif (str_contains($parentSlug, 'watches')) {
+                    $colors = ['silver', 'gold', 'black'];
+                } elseif (str_contains($parentSlug, 'bags')) {
+                    $capacities = ['20L', '30L'];
+                    $colors = ['black', 'tan'];
+                }
+                
+                $variantsData = [];
+                if (!empty($colors) && !empty($sizes)) {
+                    foreach ($colors as $c) {
+                        foreach ($sizes as $s) {
+                            $variantsData[] = [
+                                'suffix' => strtoupper($s . '-' . substr($c, 0, 3)),
+                                'price_offset' => 0,
+                                'attrs' => [['Size', $s], ['Color', $c]]
+                            ];
+                        }
+                    }
+                } elseif (!empty($colors) && !empty($storages)) {
+                    foreach ($colors as $c) {
+                        foreach ($storages as $st) {
+                            $priceOffset = str_contains($st, '512') ? 8000 : (str_contains($st, '256') ? 4000 : 0);
+                            $variantsData[] = [
+                                'suffix' => strtoupper(substr($st, 0, 3) . '-' . substr($c, 0, 3)),
+                                'price_offset' => $priceOffset,
+                                'attrs' => [['Storage', $st], ['Color', $c]]
+                            ];
+                        }
+                    }
+                } elseif (!empty($colors) && !empty($capacities)) {
+                    foreach ($colors as $c) {
+                        foreach ($capacities as $cap) {
+                            $priceOffset = str_contains($cap, '30L') ? 600 : 0;
+                            $variantsData[] = [
+                                'suffix' => strtoupper($cap . '-' . substr($c, 0, 3)),
+                                'price_offset' => $priceOffset,
+                                'attrs' => [['Capacity', $cap], ['Color', $c]]
+                            ];
+                        }
+                    }
+                } elseif (!empty($colors)) {
+                    foreach ($colors as $c) {
+                        $priceOffset = ($c === 'gold') ? 1500 : (($c === 'black') ? 500 : 0);
+                        $variantsData[] = [
+                            'suffix' => strtoupper(substr($c, 0, 3)),
+                            'price_offset' => $priceOffset,
+                            'attrs' => [['Color', $c]]
+                        ];
+                    }
+                }
+
+                $getColorImageIndex = function($pSlug, $colorName) {
+                    $color = strtolower($colorName);
+                    if (str_contains($pSlug, 'fashion')) {
+                        if ($color === 'black' || $color === 'yellow') return 0;
+                        if ($color === 'white' || $color === 'cream') return 1;
+                        if ($color === 'olive' || $color === 'green') return 0;
+                    }
+                    if (str_contains($pSlug, 'electronics')) {
+                        if (str_contains($color, 'gray') || str_contains($color, 'black')) return 0;
+                        if (str_contains($color, 'silver') || str_contains($color, 'white')) return 1;
+                    }
+                    if (str_contains($pSlug, 'footwear')) {
+                        if ($color === 'red') return 0;
+                        if ($color === 'green' || $color === 'lime') return 1;
+                        if ($color === 'tan' || $color === 'beige') return 2;
+                        if ($color === 'black') return 0;
+                        if ($color === 'brown') return 3;
+                    }
+                    if (str_contains($pSlug, 'watches')) {
+                        if ($color === 'silver' || $color === 'white') return 0;
+                        if ($color === 'gold') return 1;
+                        if ($color === 'black') return 3;
+                    }
+                    if (str_contains($pSlug, 'bags')) {
+                        if ($color === 'black') return 0;
+                        if ($color === 'tan' || $color === 'brown') return 1;
+                    }
+                    return 0;
+                };
+
+                foreach ($variantsData as $vInfo) {
+                    $vSku = $product->sku . '-' . $vInfo['suffix'];
+                    
+                    $colorValue = 'black';
+                    foreach ($vInfo['attrs'] as $pair) {
+                        if ($pair[0] === 'Color') {
+                            $colorValue = $pair[1];
+                            break;
+                        }
+                    }
+                    
+                    $imgIndex = $getColorImageIndex($parentSlug, $colorValue);
+                    $vImagePath = null;
+                    if (!empty($categoryImages)) {
+                        $vImagePath = $categoryImages[$imgIndex % count($categoryImages)];
+                    }
+                    
+                    $variant = ProductVariant::create([
+                        'product_id' => $product->id,
+                        'sku' => $vSku,
+                        'price' => $product->price + $vInfo['price_offset'],
+                        'sale_price' => $product->sale_price ? ($product->sale_price + $vInfo['price_offset']) : null,
+                        'quantity' => 50,
+                        'image_path' => $vImagePath
+                    ]);
+                    
+                    $attrValIds = [];
+                    foreach ($vInfo['attrs'] as $attrPair) {
+                        $attr = Attribute::firstOrCreate(['name' => $attrPair[0]]);
+                        $val = AttributeValue::firstOrCreate(['attribute_id' => $attr->id, 'value' => $attrPair[1]]);
+                        $attrValIds[] = $val->id;
+                    }
+                    $variant->attributeValues()->sync($attrValIds);
                 }
             }
         }

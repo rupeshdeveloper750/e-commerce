@@ -3,7 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "vite build",
+        "build": "node -e \"const fs = require('fs'); ['public/hot', 'public/build/hot'].forEach(f => fs.existsSync(f) && fs.unlinkSync(f))\" && vite build",
         "dev": "vite"
     },
     "devDependencies": {

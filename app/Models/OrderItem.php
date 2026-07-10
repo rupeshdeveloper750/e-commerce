@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
     'product_name',
     'price',
     'quantity',
+    'subtotal',
 ])]
 class OrderItem extends Model
 {

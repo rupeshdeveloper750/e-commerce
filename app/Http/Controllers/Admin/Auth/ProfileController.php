@@ -56,9 +56,15 @@ class ProfileController extends Controller
      */
     public function updateAvatar(Request $request)
     {
-        $request->validate([
-            'avatar' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
-        ]);
+        if ($request->filled('avatar_base64')) {
+            $request->validate([
+                'avatar_base64' => ['required', 'string'],
+            ]);
+        } else {
+            $request->validate([
+                'avatar' => ['required', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+            ]);
+        }
 
         $admin = $this->getAdmin();
 
@@ -67,7 +73,30 @@ class ProfileController extends Controller
             Storage::disk('public')->delete($admin->profile_photo);
         }
 
-        $path = $request->file('avatar')->store('admin/avatars', 'public');
+        if ($request->filled('avatar_base64')) {
+            $base64Data = $request->input('avatar_base64');
+            if (preg_match('/^data:image\/(\w+);base64,/', $base64Data, $type)) {
+                $base64Data = substr($base64Data, strpos($base64Data, ',') + 1);
+                $type = strtolower($type[1]);
+                if (!in_array($type, ['jpg', 'jpeg', 'gif', 'png', 'webp'])) {
+                    return back()->withErrors(['avatar' => 'Invalid image type.']);
+                }
+                $base64Data = base64_decode($base64Data);
+                if ($base64Data === false) {
+                    return back()->withErrors(['avatar' => 'Base64 decode failed.']);
+                }
+            } else {
+                $base64Data = base64_decode($base64Data);
+                $type = 'png';
+            }
+            
+            $filename = 'admin_avatar_' . time() . '_' . uniqid() . '.' . $type;
+            $path = 'admin/avatars/' . $filename;
+            Storage::disk('public')->put($path, $base64Data);
+        } else {
+            $path = $request->file('avatar')->store('admin/avatars', 'public');
+        }
+
         $admin->profile_photo = $path;
         $admin->save();
 

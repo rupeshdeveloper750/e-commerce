@@ -11,7 +11,7 @@ class ProductVariant extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['product_id', 'sku', 'price', 'sale_price', 'quantity'];
+    protected $fillable = ['product_id', 'sku', 'price', 'sale_price', 'quantity', 'image_path'];
 
     /**
      * Get the product that owns the variant.

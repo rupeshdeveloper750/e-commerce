@@ -56,6 +56,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('store.coupon.apply');
     Route::get('/checkout/remove-coupon', [CheckoutController::class, 'removeCoupon'])->name('store.coupon.remove');
     Route::post('/checkout/place', [CheckoutController::class, 'placeOrder'])->name('store.checkout.place');
+    Route::post('/checkout/verify-payment', [CheckoutController::class, 'verifyPayment'])->name('store.checkout.verify');
     Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('store.order.success');
 
     // Customer Account Dashboard & Wishlist

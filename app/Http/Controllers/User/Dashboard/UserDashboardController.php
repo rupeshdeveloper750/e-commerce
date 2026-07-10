@@ -10,19 +10,51 @@ use Illuminate\Http\Request;
 
 class UserDashboardController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     public function index()
     {
-        $orders = Order::where('user_id', auth()->id())->latest()->get();
-        $wishlist = Wishlist::with('product.featuredImage')
+        $orders = Order::with(['items.product.featuredImage'])
+            ->where('user_id', auth()->id())
+            ->latest()
+            ->get();
+            
+        $wishlist = Wishlist::with(['product.featuredImage'])
             ->where('user_id', auth()->id())
             ->get();
 
-        return view('user.dashboard', compact('orders', 'wishlist'));
+        // Load reviews submitted by this customer
+        $reviews = \App\Models\Review::with(['product.featuredImage'])
+            ->where('user_id', auth()->id())
+            ->latest()
+            ->get();
+
+        // Load active coupons
+        $coupons = \App\Models\Coupon::where('status', true)
+            ->where('expiry_date', '>=', now())
+            ->take(6)
+            ->get();
+
+        // Load recently viewed products
+        $recentlyViewed = \App\Models\Product::with('featuredImage')
+            ->orderBy('id', 'desc')
+            ->take(6)
+            ->get();
+
+        // Load recommended products
+        $recommendedProducts = \App\Models\Product::with(['featuredImage', 'brand', 'reviews'])
+            ->where('status', true)
+            ->where('is_featured', true)
+            ->latest()
+            ->take(8)
+            ->get();
+        if ($recommendedProducts->isEmpty()) {
+            $recommendedProducts = \App\Models\Product::with(['featuredImage', 'brand', 'reviews'])
+                ->where('status', true)
+                ->inRandomOrder()
+                ->take(8)
+                ->get();
+        }
+
+        return view('user.dashboard', compact('orders', 'wishlist', 'reviews', 'coupons', 'recentlyViewed', 'recommendedProducts'));
     }
 
     public function addToWishlist(Product $product)

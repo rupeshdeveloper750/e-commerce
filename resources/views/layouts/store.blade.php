@@ -12,8 +12,6 @@
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <!-- Custom CSS for Premium Design Transitions -->
     <style>
@@ -21,7 +19,7 @@
             display: none !important;
         }
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Playfair Display', serif;
         }
         
         /* Premium Toast Animation Styles */
@@ -91,7 +89,7 @@
         }
     </style>
 </head>
-<body class="h-full bg-white text-[#111827] antialiased flex flex-col justify-between"
+<body class="h-full {{ request()->routeIs('user.dashboard') ? 'bg-[#FAFAFA]' : 'bg-white' }} text-[#111827] antialiased flex flex-col justify-between"
       x-data="{ 
           scrolled: false, 
           activeMenu: null, 
@@ -219,7 +217,7 @@
                     @auth
                         <div x-data="{ open: false }" class="relative ml-[2px]">
                             <button @click="open = !open" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border border-black/[0.05] hover:border-[#B88A44]/35 hover:scale-105 shadow-sm transition-all duration-[220ms] focus:outline-none">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=B88A44&color=ffffff" class="w-full h-full object-cover" alt="">
+                                <img src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=B88A44&color=ffffff' }}" class="w-full h-full object-cover" alt="">
                             </button>
                             <div x-show="open" @click.away="open = false" class="absolute right-0 mt-3 w-52 rounded-2xl bg-white border border-[#E5E7EB] shadow-2xl py-2 z-50 text-gray-700 text-sm overflow-hidden" x-cloak>
                                 <div class="px-4 py-2 bg-gray-50/50 border-b border-[#E5E7EB] mb-1">
@@ -235,12 +233,39 @@
                             </div>
                         </div>
                     @else
-                        <a 
-                            href="{{ route('login') }}" 
-                            class="group/login-btn ml-[2px] inline-flex items-center justify-center h-9 sm:h-[42px] px-3 sm:px-[22px] rounded-full text-[10px] sm:text-xs font-semibold tracking-[0.3px] uppercase text-white bg-gradient-to-r from-[#B88A44] to-[#A77933] hover:from-[#A77933] hover:to-[#8E6226] ring-1 ring-white/10 ring-inset shadow-md shadow-[#B88A44]/15 hover:shadow-lg transition-all duration-[220ms] overflow-hidden"
-                        >
-                            <span>Login</span>
-                        </a>
+                        <div x-data="{ open: false }" class="relative ml-[2px]" @mouseenter="open = true" @mouseleave="open = false">
+                            <button @click="open = !open" class="group/login-btn inline-flex items-center justify-center h-9 sm:h-[42px] px-3.5 sm:px-[22px] rounded-full text-[10px] sm:text-xs font-semibold tracking-[0.3px] uppercase text-white bg-gradient-to-r from-[#B88A44] to-[#A77933] hover:from-[#A77933] hover:to-[#8E6226] ring-1 ring-white/10 ring-inset shadow-md shadow-[#B88A44]/15 hover:shadow-lg transition-all duration-[220ms] focus:outline-none">
+                                <span>Login</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 ml-1.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" class="absolute right-0 mt-3 w-64 rounded-2xl bg-white border border-[#E5E7EB] shadow-2xl p-5 z-50 text-gray-700 text-sm overflow-hidden flex flex-col gap-4" @click.away="open = false">
+                                <div class="text-center space-y-1">
+                                    <span class="block font-serif font-bold text-stone-900 text-base">Welcome to ShopMe</span>
+                                    <span class="block text-[8px] text-stone-400 font-bold uppercase tracking-widest leading-none">Premium Tech Accessories</span>
+                                </div>
+                                
+                                <a href="{{ route('login') }}" class="w-full h-10 rounded-xl bg-[#B88A44] hover:bg-[#A77933] text-white text-[10px] font-bold uppercase tracking-widest flex items-center justify-center transition shadow-md shadow-[#B88A44]/15">
+                                    Sign In
+                                </a>
+
+                                <div class="text-center text-xs font-semibold text-stone-500">
+                                    New Customer? <a href="{{ route('register') }}" class="text-[#B88A44] hover:underline font-bold">Sign Up</a>
+                                </div>
+
+                                <div class="border-t border-[#E5E7EB] pt-3 flex flex-col gap-3 text-xs font-semibold text-stone-600">
+                                    <a href="{{ route('store.shop') }}" class="hover:text-[#B88A44] transition flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-stone-400"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                        <span>Order Tracking</span>
+                                    </a>
+                                    <a href="{{ route('store.cart') }}" class="hover:text-[#B88A44] transition flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-stone-400"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                                        <span>My Shopping Bag</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     @endauth
 
                     {{-- Mobile Toggle --}}
@@ -600,20 +625,24 @@
     <main class="flex-grow max-w-7xl w-full mx-auto px-6 sm:px-8 lg:px-12 pt-40 pb-16">
         
         @if(session('success'))
-            <div class="mb-8 rounded-2xl border border-emerald-500/25 bg-emerald-50/20 p-4.5 text-sm text-emerald-600 flex items-center gap-3">
-                <svg class="w-5 h-5 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span class="font-medium">{{ session('success') }}</span>
+            <div class="mb-8 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] p-4 text-xs font-bold text-emerald-800 flex items-center gap-3 shadow-sm shadow-emerald-500/5 font-sans">
+                <div class="p-1 bg-emerald-500/10 rounded-lg text-emerald-600 shrink-0">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <span>{{ session('success') }}</span>
             </div>
         @endif
 
         @if(session('error'))
-            <div class="mb-8 rounded-2xl border border-rose-500/25 bg-rose-50/20 p-4.5 text-sm text-rose-600 flex items-center gap-3">
-                <svg class="w-5 h-5 shrink-0 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span class="font-medium">{{ session('error') }}</span>
+            <div class="mb-8 rounded-2xl border border-rose-500/20 bg-rose-500/[0.04] p-4 text-xs font-bold text-rose-800 flex items-center gap-3 shadow-sm shadow-rose-500/5 font-sans">
+                <div class="p-1 bg-rose-500/10 rounded-lg text-rose-600 shrink-0">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </div>
+                <span>{{ session('error') }}</span>
             </div>
         @endif
 
@@ -632,31 +661,46 @@
         $initialCartCount = $cartQuery->where('is_saved', false)->count();
     @endphp
     <div class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-stone-150/70 sm:hidden flex items-center justify-around py-2 px-3 shadow-[0_-4px_25px_rgba(0,0,0,0.06)] pb-safe">
-        <a href="{{ route('store.home') }}" class="flex flex-col items-center gap-1 text-stone-500 hover:text-[#B88A44] transition-colors py-1">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <a href="{{ route('store.home') }}" class="flex flex-col items-center gap-0.5 {{ request()->routeIs('store.home') ? 'text-[#B88A44]' : 'text-stone-400' }} hover:text-[#B88A44] transition-colors py-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="{{ request()->routeIs('store.home') ? 'rgba(184,138,68,0.15)' : 'none' }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             <span class="text-[8px] font-bold uppercase tracking-widest">Home</span>
+            @if(request()->routeIs('store.home'))
+                <span class="w-1 h-1 rounded-full bg-[#B88A44] mt-0.5"></span>
+            @endif
         </a>
-        <a href="{{ route('store.shop') }}" class="flex flex-col items-center gap-1 text-stone-500 hover:text-[#B88A44] transition-colors py-1">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <a href="{{ route('store.shop') }}" class="flex flex-col items-center gap-0.5 {{ (request()->routeIs('store.shop') && !request()->routeIs('store.deals')) ? 'text-[#B88A44]' : 'text-stone-400' }} hover:text-[#B88A44] transition-colors py-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="{{ (request()->routeIs('store.shop') && !request()->routeIs('store.deals')) ? 'rgba(184,138,68,0.15)' : 'none' }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             <span class="text-[8px] font-bold uppercase tracking-widest">Shop</span>
+            @if(request()->routeIs('store.shop') && !request()->routeIs('store.deals'))
+                <span class="w-1 h-1 rounded-full bg-[#B88A44] mt-0.5"></span>
+            @endif
         </a>
         <a href="{{ route('store.cart') }}" 
            x-data="{ cartCount: {{ $initialCartCount }} }"
            @cart-count-updated.window="cartCount = $event.detail.count"
-           class="flex flex-col items-center gap-1 text-stone-500 hover:text-[#B88A44] transition-colors py-1 relative">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            <span x-show="cartCount > 0" x-text="cartCount" class="absolute -top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-[#B88A44] text-white text-[8px] font-bold flex items-center justify-center shadow-md"></span>
+           class="flex flex-col items-center gap-0.5 {{ request()->routeIs('store.cart') ? 'text-[#B88A44]' : 'text-stone-400' }} hover:text-[#B88A44] transition-colors py-1 relative">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="{{ request()->routeIs('store.cart') ? 'rgba(184,138,68,0.15)' : 'none' }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            <span x-show="cartCount > 0" x-text="cartCount" class="absolute top-0 right-1 w-3.5 h-3.5 rounded-full bg-[#B88A44] text-white text-[8px] font-bold flex items-center justify-center shadow-md"></span>
             <span class="text-[8px] font-bold uppercase tracking-widest">Bag</span>
+            @if(request()->routeIs('store.cart'))
+                <span class="w-1 h-1 rounded-full bg-[#B88A44] mt-0.5"></span>
+            @endif
         </a>
         @auth
-        <a href="{{ route('user.dashboard') }}" class="flex flex-col items-center gap-1 text-stone-500 hover:text-[#B88A44] transition-colors py-1">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <a href="{{ route('user.dashboard') }}" class="flex flex-col items-center gap-0.5 {{ request()->routeIs('user.dashboard') ? 'text-[#B88A44]' : 'text-stone-400' }} hover:text-[#B88A44] transition-colors py-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="{{ request()->routeIs('user.dashboard') ? 'rgba(184,138,68,0.15)' : 'none' }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span class="text-[8px] font-bold uppercase tracking-widest">Account</span>
+            @if(request()->routeIs('user.dashboard'))
+                <span class="w-1 h-1 rounded-full bg-[#B88A44] mt-0.5"></span>
+            @endif
         </a>
         @else
-        <a href="{{ route('login') }}" class="flex flex-col items-center gap-1 text-stone-500 hover:text-[#B88A44] transition-colors py-1">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-in"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+        <a href="{{ route('login') }}" class="flex flex-col items-center gap-0.5 {{ (request()->routeIs('login') || request()->routeIs('register')) ? 'text-[#B88A44]' : 'text-stone-400' }} hover:text-[#B88A44] transition-colors py-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="{{ (request()->routeIs('login') || request()->routeIs('register')) ? 'rgba(184,138,68,0.15)' : 'none' }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-in"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
             <span class="text-[8px] font-bold uppercase tracking-widest">Login</span>
+            @if(request()->routeIs('login') || request()->routeIs('register'))
+                <span class="w-1 h-1 rounded-full bg-[#B88A44] mt-0.5"></span>
+            @endif
         </a>
         @endauth
     </div>

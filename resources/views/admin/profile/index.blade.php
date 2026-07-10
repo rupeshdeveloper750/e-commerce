@@ -181,6 +181,7 @@
               dragging: false,
               cameraOpen: false,
               stream: null,
+              avatarBase64: '',
 
               async openCamera() {
                   try {
@@ -222,11 +223,18 @@
                   const ctx = canvas.getContext('2d');
                   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
  
+                  const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                  this.avatarBase64 = dataUrl;
+
                   canvas.toBlob((blob) => {
                       const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
-                      const dt = new DataTransfer();
-                      dt.items.add(file);
-                      this.$refs.avatarInput.files = dt.files;
+                      try {
+                          const dt = new DataTransfer();
+                          dt.items.add(file);
+                          this.$refs.avatarInput.files = dt.files;
+                      } catch (e) {
+                          console.log('DataTransfer fallback.');
+                      }
  
                       this.preview = URL.createObjectURL(blob);
                       this.closeCamera();
@@ -236,12 +244,13 @@
           @submit="closeCamera()">
         @csrf
         @method('PUT')
+        <input type="hidden" name="avatar_base64" :value="avatarBase64">
 
         {{-- Upload / Drag-Drop Box --}}
         <div x-show="!cameraOpen"
              @dragover.prevent="dragging = true"
              @dragleave.prevent="dragging = false"
-             @drop.prevent="dragging = false; const file = $event.dataTransfer.files[0]; if (file) { $refs.avatarInput.files = $event.dataTransfer.files; preview = URL.createObjectURL(file); }"
+             @drop.prevent="dragging = false; this.avatarBase64 = ''; const file = $event.dataTransfer.files[0]; if (file) { $refs.avatarInput.files = $event.dataTransfer.files; preview = URL.createObjectURL(file); }"
              :class="dragging ? 'border-[#B88A44] bg-[#B88A44]/5' : 'border-slate-700 bg-slate-900/30'"
              class="relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-10 transition cursor-pointer"
              @click="$refs.avatarInput.click()">
@@ -267,7 +276,7 @@
 
             <input x-ref="avatarInput" type="file" name="avatar" accept="image/*" class="hidden"
                    @click.stop
-                   @change="preview = URL.createObjectURL($event.target.files[0])">
+                   @change="this.avatarBase64 = ''; preview = URL.createObjectURL($event.target.files[0])">
         </div>
 
         {{-- Camera Live Preview --}}

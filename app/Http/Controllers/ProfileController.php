@@ -26,15 +26,49 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        
+        $data = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($request->filled('avatar_base64')) {
+            // Delete old avatar if exists
+            if ($user->avatar) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+            }
+            
+            $base64Data = $request->input('avatar_base64');
+            if (preg_match('/^data:image\/(\w+);base64,/', $base64Data, $type)) {
+                $base64Data = substr($base64Data, strpos($base64Data, ',') + 1);
+                $type = strtolower($type[1]);
+                if (in_array($type, ['jpg', 'jpeg', 'gif', 'png', 'webp'])) {
+                    $base64Data = base64_decode($base64Data);
+                    if ($base64Data !== false) {
+                        $filename = 'avatar_' . time() . '_' . uniqid() . '.' . $type;
+                        $path = 'avatars/' . $filename;
+                        \Illuminate\Support\Facades\Storage::disk('public')->put($path, $base64Data);
+                        $data['avatar'] = $path;
+                    }
+                }
+            }
+        } elseif ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
+            if ($user->avatar) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+            }
+            // Store new avatar
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $data['avatar'] = $path;
         }
 
-        $request->user()->save();
+        $user->fill($data);
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        return Redirect::route('user.dashboard')->with('success', 'Profile settings updated successfully.');
     }
 
     /**
