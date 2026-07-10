@@ -15,13 +15,6 @@
     
     <div class="max-w-[1550px] mx-auto space-y-3.5">
         
-        {{-- Breadcrumbs Navigation --}}
-        <nav class="flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-            <a href="{{ route('store.home') }}" class="hover:text-[#B88A44] transition-colors">Home</a>
-            <span class="text-gray-300/80">/</span>
-            <span class="text-stone-900">Shop</span>
-        </nav>
-
         {{-- Category Pills Strip --}}
         <x-shop.category-strip :categories="$categories" />
 

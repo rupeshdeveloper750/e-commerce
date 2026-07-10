@@ -229,23 +229,5 @@
             slider.scrollLeft = scrollLeft - walk;
         }, { passive: true });
 
-        // Auto Hide Category Strip on Scroll Down, Show on Scroll Up
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 40) {
-                slider.style.maxHeight = '0px';
-                slider.style.opacity = '0';
-                slider.style.paddingTop = '0px';
-                slider.style.paddingBottom = '0px';
-                slider.style.borderBottomColor = 'transparent';
-                slider.style.pointerEvents = 'none';
-            } else {
-                slider.style.maxHeight = '110px';
-                slider.style.opacity = '1';
-                slider.style.paddingTop = '14px';
-                slider.style.paddingBottom = '14px';
-                slider.style.borderBottomColor = 'rgba(243, 244, 246, 0.8)';
-                slider.style.pointerEvents = 'auto';
-            }
-        }, { passive: true });
     });
 </script>
