@@ -26,14 +26,14 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 6px;
+        gap: 5px;
         text-decoration: none;
         flex-shrink: 0;
         cursor: pointer;
     }
     .category-circle-img-wrap {
-        width: 52px;
-        height: 52px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
         overflow: hidden;
         border: 2px solid #E5E7EB;
@@ -42,6 +42,12 @@
         align-items: center;
         justify-content: center;
         transition: all 0.3s ease;
+    }
+    @media (min-width: 640px) {
+        .category-circle-img-wrap {
+            width: 52px;
+            height: 52px;
+        }
     }
     .category-circle-item:hover .category-circle-img-wrap {
         border-color: #B88A44;
@@ -62,13 +68,25 @@
         transform: scale(1.1);
     }
     .category-circle-label {
-        font-size: 9px;
+        font-size: 8px;
         font-weight: 600;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.02em;
         text-transform: uppercase;
         text-align: center;
         color: #6B7280;
         transition: color 0.3s ease;
+        max-width: 58px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    @media (min-width: 640px) {
+        .category-circle-label {
+            font-size: 9px;
+            letter-spacing: 0.05em;
+            max-width: none;
+            white-space: normal;
+        }
     }
     .category-circle-label.active {
         color: #B88A44;
@@ -128,8 +146,8 @@
     };
 @endphp
 
-<div id="category-scroll-container" class="w-full no-scrollbar py-3.5 scroll-smooth cursor-grab active:cursor-grabbing">
-    <div class="flex items-center gap-8 sm:gap-10 w-max px-4">
+<div id="category-scroll-container" class="w-full no-scrollbar py-3 border-b border-gray-100/60 scroll-smooth cursor-grab active:cursor-grabbing">
+    <div class="flex items-center gap-3.5 sm:gap-6 md:gap-8 w-max px-3">
         {{-- All Collection --}}
         <a href="{{ route('store.shop') }}" class="category-circle-item">
             <div class="category-circle-img-wrap {{ !request('category') ? 'active' : '' }}">
