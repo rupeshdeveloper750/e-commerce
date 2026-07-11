@@ -38,7 +38,7 @@ class Coupon extends Model
             return false;
         }
 
-        if ($this->expiry_date && $this->expiry_date->isPast()) {
+        if ($this->expiry_date && $this->expiry_date->endOfDay()->isPast()) {
             return false;
         }
 

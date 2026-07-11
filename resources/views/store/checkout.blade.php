@@ -681,10 +681,10 @@ if (!function_exists('getCheckoutItemImage')) {
                         <div class="pt-2 font-sans">
                             <button 
                                 type="submit" 
-                                class="w-full inline-flex items-center justify-center gap-2 rounded-[18px] bg-[#B88A44] hover:bg-[#a67c3b] h-14 text-xs font-bold text-white shadow-md shadow-brand-500/10 hover:shadow-[#B88A44]/20 transition focus:outline-none active:scale-99 hover-gold-glow"
+                                class="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#B88A44] hover:bg-[#a67c3b] h-10 text-[10px] font-bold uppercase tracking-[0.12em] text-white shadow-sm hover:shadow-[#B88A44]/20 transition focus:outline-none active:scale-[0.99]"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white/95" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                                <span>🔒 Secure Place Order</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                <span>Place Order Securely</span>
                             </button>
                         </div>
 

@@ -441,7 +441,7 @@
 
             {{-- Has items --}}
             <template x-if="items.length > 0">
-                <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 items-start">
+                <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8">
 
                     {{-- ════ LEFT: CART ITEMS ════ --}}
                     <div class="space-y-4">
@@ -541,134 +541,201 @@
                                 Continue Shopping
                             </a>
                         </div>
+
+                        {{-- ══ SAVED FOR LATER (INSIDE GRID) ══ --}}
+                        <div class="mt-14 pt-10 border-t border-[#e8e6e1]">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div>
+                                    <span class="section-label">Saved items</span>
+                                    <h3 class="cart-serif text-xl font-bold text-[#1c1c1e]">
+                                        Saved For Later <span class="text-[#c9973f] italic font-semibold text-lg" x-text="`(${savedItems.length})`"></span>
+                                    </h3>
+                                </div>
+                                <div class="flex-1 h-[1px] bg-[#e8e6e1]"></div>
+                            </div>
+
+                            <div x-show="savedItems.length > 0">
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-5">
+                                    <template x-for="(item, idx) in savedItems" :key="item.id">
+                                        <div class="group relative cursor-pointer flex flex-col justify-between rounded-2xl border border-[#E5E7EB]/60 bg-white p-4 hover:shadow-xl hover:border-transparent transition-all duration-300">
+                                            <div>
+                                                {{-- Image Wrapper --}}
+                                                <div class="aspect-[4/5] bg-gray-50 rounded-xl overflow-hidden relative border border-gray-150/40">
+                                                    <img :src="img(item.image)" :alt="item.name" class="w-full h-full object-cover scale-100 group-hover:scale-105 transition-transform duration-500 ease-out" loading="lazy">
+                                                    
+                                                    {{-- Sale tag --}}
+                                                    <div class="absolute top-3 left-3 z-10">
+                                                        <span class="rounded border border-[#B88A44] bg-white/95 px-2.5 py-0.5 text-[8px] font-bold text-[#B88A44] uppercase tracking-widest shadow-sm">Sale</span>
+                                                    </div>
+
+                                                    {{-- Trash Remove Trigger in top right --}}
+                                                    <div class="absolute top-3 right-3 z-10 no-card-redirect">
+                                                        <button @click="removeItem(item.id)" class="w-8 h-8 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-gray-600 hover:text-red-500 hover:scale-110 shadow-sm transition duration-200 focus:outline-none" aria-label="Remove item">
+                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                                                        </button>
+                                                    </div>
+
+                                                    {{-- Add to Bag Overlay on Hover --}}
+                                                    <div class="no-card-redirect absolute inset-x-3 bottom-3 z-10 translate-y-2 opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 transition-all duration-300">
+                                                        <button @click="moveToBag(item.id)" class="w-full h-10 rounded-xl bg-[#111827] text-white hover:bg-[#B88A44] text-xs font-bold uppercase tracking-wider transition-colors duration-200 shadow-lg">
+                                                            Add to Bag
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                {{-- Card details --}}
+                                                <div class="pt-4 space-y-1">
+                                                    <span class="text-[9px] text-[#B88A44] font-bold uppercase tracking-widest" x-text="item.brand || 'Premium'"></span>
+                                                    <h3 class="font-serif font-bold text-base text-[#111827] hover:text-[#B88A44] transition-colors duration-200 line-clamp-1">
+                                                        <a :href="'/product/' + item.slug" x-text="item.name"></a>
+                                                    </h3>
+                                                </div>
+                                            </div>
+
+                                            <div class="pt-3 border-t border-gray-100 flex items-center justify-between mt-3">
+                                                <div class="flex items-baseline gap-1.5">
+                                                    <span class="font-serif font-bold text-sm text-[#B88A44]" x-text="fmt(item.price)"></span>
+                                                    <span class="text-xs text-gray-400 line-through" x-text="fmt(item.original_price || item.price * 1.1)"></span>
+                                                </div>
+
+                                                {{-- Mobile Add to Bag Trigger --}}
+                                                <div class="no-card-redirect lg:hidden">
+                                                    <button @click="moveToBag(item.id)" class="w-8 h-8 rounded-lg bg-gray-50 border border-gray-150/40 flex items-center justify-center text-gray-700 hover:bg-[#B88A44] hover:text-white transition duration-200">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div x-show="savedItems.length === 0" class="py-6 text-center text-xs text-[#6b6b76] italic">
+                                No saved items. Use "Save for later" on cart items to save them here.
+                            </div>
+                        </div>
                     </div>
 
-                    {{-- ════ RIGHT: SIDEBAR ════ --}}
-                    <div class="space-y-4 lg:sticky lg:top-24">
+                    {{-- ════ RIGHT: SIDEBAR COLUMN ════ --}}
+                    <div class="space-y-4" style="position: sticky; top: 120px; z-index: 30; align-self: start;">
 
-                        {{-- ── Order Summary ── --}}
-                        <div class="cart-card p-5 sm:p-6 space-y-4">
-                            <div class="pb-3 border-b border-[#e8e6e1]">
-                                <span class="section-label">Order Summary</span>
-                                <h3 class="cart-serif text-[16px] font-bold text-[#1c1c1e]">Your Bill</h3>
+                        {{-- Unified Order Summary Card --}}
+                        <div class="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm space-y-5">
+                            <div class="pb-3 border-b border-gray-100 font-sans">
+                                <span class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest">Order Summary</span>
+                                <h3 class="font-serif font-black text-lg text-gray-900 mt-0.5">Your Summary</h3>
                             </div>
 
-                            <div class="space-y-1 divide-y divide-[#f0ede8]">
-                                <div class="summary-row">
-                                    <span class="summary-label">Subtotal</span>
-                                    <span class="summary-value" x-text="fmt(subtotal)"></span>
+                            {{-- Calculations List --}}
+                            <div class="space-y-2.5 font-sans text-xs text-gray-500 font-semibold border-b border-gray-100 pb-4">
+                                <div class="flex justify-between">
+                                    <span>Subtotal</span>
+                                    <span class="text-gray-900 font-bold" x-text="fmt(subtotal)"></span>
                                 </div>
                                 <template x-if="giftWrapTotal > 0">
-                                    <div class="summary-row">
-                                        <span class="summary-label">Gift Wrapping</span>
-                                        <span class="summary-value" x-text="fmt(giftWrapTotal)"></span>
+                                    <div class="flex justify-between">
+                                        <span>Gift Wrapping</span>
+                                        <span class="text-gray-900 font-bold" x-text="fmt(giftWrapTotal)"></span>
                                     </div>
                                 </template>
-                                <div class="summary-row">
-                                    <span class="summary-label">Shipping</span>
-                                    <span x-show="shipping === 0" class="text-[9px] font-bold text-[#2f9e5b] bg-[#edf7f1] px-2.5 py-0.5 rounded-full uppercase tracking-wider">FREE</span>
-                                    <span x-show="shipping > 0" class="summary-value" x-text="fmt(shipping)"></span>
+                                <div class="flex justify-between">
+                                    <span>Shipping</span>
+                                    <template x-if="shipping === 0">
+                                        <span class="text-[8px] font-bold text-[#16A34A] bg-green-50 border border-green-150 px-2 py-0.5 rounded uppercase tracking-wider">FREE</span>
+                                    </template>
+                                    <template x-if="shipping > 0">
+                                        <span class="text-gray-900 font-bold" x-text="fmt(shipping)"></span>
+                                    </template>
                                 </div>
                                 <template x-if="discount > 0">
-                                    <div class="summary-row bg-[#edf7f1] rounded-xl px-2.5 -mx-1">
-                                        <span class="summary-label text-[#2f9e5b]">Coupon Discount</span>
-                                        <span class="font-bold text-[#2f9e5b] text-[12px]" x-text="'- ' + fmt(discount)"></span>
+                                    <div class="flex justify-between bg-green-50/50 border border-green-100 rounded-xl p-2 text-[#16A34A]">
+                                        <span>Coupon Discount</span>
+                                        <span class="font-bold" x-text="'- ' + fmt(discount)"></span>
                                     </div>
                                 </template>
                             </div>
 
-                            <div class="pt-3 border-t border-[#e8e6e1] flex justify-between items-baseline gap-4">
-                                <span class="summary-total-label">Total Amount</span>
-                                <span class="summary-total-value" x-text="fmt(total)"></span>
+                            {{-- Promo Code Input Section --}}
+                            <div class="space-y-2.5 pb-4 border-b border-gray-100">
+                                <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-widest font-sans">Apply Promo Code</label>
+                                <div class="flex gap-2">
+                                    <input 
+                                        x-model="couponCode" 
+                                        type="text" 
+                                        placeholder="ENTER CODE" 
+                                        @keydown.enter.prevent="applyCoupon()"
+                                        class="flex-grow h-8.5 px-3 text-[10px] font-extrabold uppercase tracking-widest text-gray-900 bg-[#FCFCFC] border border-gray-205 rounded-lg focus:border-[#B88A44] focus:ring-0 focus:outline-none transition"
+                                    >
+                                    <button 
+                                        @click="applyCoupon()" 
+                                        class="h-8.5 px-3 text-[9px] font-bold text-white bg-[#B88A44] hover:bg-[#a67c3b] rounded-lg transition shadow-sm active:scale-95 focus:outline-none"
+                                    >
+                                        Apply
+                                    </button>
+                                </div>
+
+                                {{-- Quick select chips --}}
+                                <div class="flex flex-wrap gap-1">
+                                    <button @click="selectCoupon('SHOPME20')" class="inline-flex items-center px-2 py-0.5 rounded border border-dashed border-gray-200 text-[8px] font-bold text-[#B88A44] hover:border-[#B88A44] hover:bg-[#B88A44]/5 transition">SHOPME20 (20% Off)</button>
+                                    <button @click="selectCoupon('GOLD1000')" class="inline-flex items-center px-2 py-0.5 rounded border border-dashed border-gray-200 text-[8px] font-bold text-[#B88A44] hover:border-[#B88A44] hover:bg-[#B88A44]/5 transition">GOLD1000 (₹1k Off)</button>
+                                </div>
+
+                                {{-- Success alert --}}
+                                <div x-show="couponSuccess" class="slide-down flex items-center justify-between gap-2 bg-green-50 border border-green-150 rounded-lg px-2.5 py-1.5" style="display:none;">
+                                    <div class="flex items-center gap-1 text-[9px] font-bold text-[#16A34A] font-sans">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                                        <span x-text="couponSuccess"></span>
+                                    </div>
+                                    <button @click="removeCoupon()" class="text-gray-400 hover:text-red-500 font-bold text-xs leading-none focus:outline-none">×</button>
+                                </div>
+
+                                {{-- Error alert --}}
+                                <div x-show="couponError" class="slide-down flex items-center gap-1 bg-rose-50 border border-rose-100 rounded-lg px-2.5 py-1.5 text-[9px] font-bold text-rose-600 font-sans" style="display:none;">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+                                    <span x-text="couponError"></span>
+                                </div>
+                            </div>
+
+                            {{-- Grand Total --}}
+                            <div class="flex justify-between items-baseline gap-2 font-sans">
+                                <span class="text-[10px] font-black text-gray-900 uppercase tracking-widest">Total Amount</span>
+                                <span class="font-serif text-xl font-black text-[#B88A44]" x-text="fmt(total)"></span>
                             </div>
 
                             {{-- CTA Button --}}
-                            <a href="{{ route('store.checkout') }}" class="btn-gold w-full h-[46px] sm:h-[48px] text-[11px] flex items-center justify-center gap-2 rounded-xl no-card-redirect">
-                                <span>Proceed to Checkout</span>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                            </a>
+                            <div class="space-y-3">
+                                <a href="{{ route('store.checkout') }}" class="w-full h-11 bg-gray-900 hover:bg-[#B88A44] text-white active:scale-98 transition-all duration-300 text-[10px] font-bold uppercase tracking-widest rounded-lg flex items-center justify-center gap-1.5 shadow-sm">
+                                    <span>Proceed to Checkout</span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                                </a>
 
-                            {{-- Secure note --}}
-                            <div class="flex items-center justify-center gap-1 text-[9px] text-[#6b6b76]">
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                <span>Secure Checkout · 256-bit SSL</span>
-                            </div>
-
-                            {{-- Payment icons --}}
-                            <div class="flex items-center justify-center gap-2 pt-2.5 border-t border-[#f0ede8]">
-                                <span class="text-[8px] font-bold text-[#6b6b76] uppercase tracking-wider">We accept</span>
-                                <img src="https://img.icons8.com/color/36/visa.png" alt="Visa" class="h-4 opacity-60 hover:opacity-100 transition-opacity">
-                                <img src="https://img.icons8.com/color/36/mastercard.png" alt="Mastercard" class="h-4 opacity-60 hover:opacity-100 transition-opacity">
-                                <img src="https://img.icons8.com/color/48/upi.png" alt="UPI" class="h-4 opacity-60 hover:opacity-100 transition-opacity">
-                            </div>
-                        </div>
-
-                        {{-- ── Promo Code ── --}}
-                        <div class="cart-card p-5 space-y-3">
-                            <div class="flex items-center gap-1.5 mb-0.5">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#B88A44" stroke-width="2.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                                <span class="text-[10px] font-bold uppercase tracking-widest text-[#111827]">Promo Code</span>
-                            </div>
-
-                             <div class="flex gap-2">
-                                 <input x-model="couponCode" type="text" placeholder="Enter coupon code..." class="coupon-input" @keydown.enter="applyCoupon()">
-                                 <button @click="applyCoupon()" class="shrink-0 h-[38px] px-4 rounded-lg border border-[#B88A44] text-[#B88A44] text-[10px] font-bold uppercase tracking-wider hover:bg-[#B88A44] hover:text-white transition-all duration-200">Apply</button>
-                             </div>
-
-                             <div class="flex flex-wrap gap-1.5 pt-0.5">
-                                 <button @click="selectCoupon('SHOPME20')" class="coupon-chip">SHOPME20 · 20% Off</button>
-                                 <button @click="selectCoupon('GOLD1000')" class="coupon-chip">GOLD1000 · ₹1,000 Off</button>
-                             </div>
-
-                             {{-- Success alert --}}
-                             <div x-show="couponSuccess" class="slide-down flex items-center justify-between gap-3 bg-[#edf7f1] border border-[#2f9e5b]/20 rounded-lg px-3 py-2" style="display:none;">
-                                 <div class="flex items-center gap-1.5 text-[10px] font-semibold text-[#2f9e5b]">
-                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
-                                     <span x-text="couponSuccess"></span>
-                                 </div>
-                                 <button @click="removeCoupon()" class="text-[#6B7280] hover:text-red-500 font-bold text-sm leading-none">×</button>
-                             </div>
-
-                             {{-- Error alert --}}
-                             <div x-show="couponError" class="slide-down flex items-center gap-1.5 bg-red-50 border border-red-200/55 rounded-lg px-3 py-2 text-[10px] font-semibold text-red-600" style="display:none;">
-                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
-                                 <span x-text="couponError"></span>
-                             </div>
-                        </div>
-
-                        {{-- ── Trust Badges ── --}}
-                        <div class="cart-card p-5">
-                            <div class="space-y-3.5">
-                                <div class="flex items-start gap-3">
-                                    <div class="trust-icon bg-[#edf7f1] text-[#2f9e5b]">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                                {{-- Compact trust badges directly inside summary card to save space --}}
+                                <div class="grid grid-cols-1 gap-2 pt-2 text-[9px] font-semibold text-gray-550 font-sans">
+                                    <div class="flex items-center gap-1.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        <span>7-Day Easy Returns Guarantee</span>
                                     </div>
-                                    <div>
-                                        <h5 class="text-[10px] font-bold uppercase tracking-wider text-[#1c1c1e]">7-Day Easy Returns</h5>
-                                        <p class="text-[9.5px] text-[#6b6b76] mt-0.5 leading-relaxed">No-hassle returns within 7 days for a full refund.</p>
+                                    <div class="flex items-center gap-1.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect width="18" height="13" x="3" y="6" rx="2"/><path d="M3 9h18"/></svg>
+                                        <span>Free Delivery Above ₹1,000</span>
                                     </div>
-                                </div>
-                                <div class="flex items-start gap-3">
-                                    <div class="trust-icon bg-[#f0f5ff] text-[#3b82f6]">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="13" x="3" y="6" rx="2"/><path d="M12 12h.01M16 12h.01M8 12h.01M3 9h18"/></svg>
-                                    </div>
-                                    <div>
-                                        <h5 class="text-[10px] font-bold uppercase tracking-wider text-[#1c1c1e]">Free Delivery Above ₹1,000</h5>
-                                        <p class="text-[9.5px] text-[#6b6b76] mt-0.5 leading-relaxed">Express delivery in 2-4 business days.</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-start gap-3">
-                                    <div class="trust-icon bg-[#fff8ed] text-[#f59e0b]">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                    </div>
-                                    <div>
-                                        <h5 class="text-[10px] font-bold uppercase tracking-wider text-[#1c1c1e]">1-Year Brand Warranty</h5>
-                                        <p class="text-[9.5px] text-[#6b6b76] mt-0.5 leading-relaxed">All electronics come with manufacturer warranty.</p>
+                                    <div class="flex items-center gap-1.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                        <span>Secure 256-bit SSL Checkout</span>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
+                            {{-- Accepted Cards Ticker --}}
+                            <div class="pt-3 border-t border-gray-100 flex items-center justify-between text-gray-400 font-sans">
+                                <span class="text-[8px] font-bold uppercase tracking-widest">We Accept</span>
+                                <div class="flex items-center gap-2">
+                                    <img src="https://img.icons8.com/color/36/visa.png" alt="Visa" class="h-3.5 opacity-50 hover:opacity-100 transition-opacity">
+                                    <img src="https://img.icons8.com/color/36/mastercard.png" alt="Mastercard" class="h-3.5 opacity-50 hover:opacity-100 transition-opacity">
+                                    <img src="https://img.icons8.com/color/48/upi.png" alt="UPI" class="h-3.5 opacity-50 hover:opacity-100 transition-opacity">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     {{-- End right sidebar --}}
                 </div>
@@ -687,78 +754,80 @@
                 </div>
             </template>
 
-            {{-- ══ SAVED FOR LATER ══ --}}
-            <div class="mt-14 pt-10 border-t border-[#e8e6e1]">
-                <div class="flex items-center gap-4 mb-6">
-                    <div>
-                        <span class="section-label">Saved items</span>
-                        <h3 class="cart-serif text-xl font-bold text-[#1c1c1e]">
-                            Saved For Later <span class="text-[#c9973f] italic font-semibold text-lg" x-text="`(${savedItems.length})`"></span>
-                        </h3>
+            {{-- ══ SAVED FOR LATER (FULL WIDTH WHEN EMPTY) ══ --}}
+            <template x-if="items.length === 0">
+                <div class="mt-14 pt-10 border-t border-[#e8e6e1]">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div>
+                            <span class="section-label">Saved items</span>
+                            <h3 class="cart-serif text-xl font-bold text-[#1c1c1e]">
+                                Saved For Later <span class="text-[#c9973f] italic font-semibold text-lg" x-text="`(${savedItems.length})`"></span>
+                            </h3>
+                        </div>
+                        <div class="flex-1 h-[1px] bg-[#e8e6e1]"></div>
                     </div>
-                    <div class="flex-1 h-[1px] bg-[#e8e6e1]"></div>
-                </div>
 
-                <div x-show="savedItems.length > 0">
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
-                        <template x-for="(item, idx) in savedItems" :key="item.id">
-                            <div class="group relative cursor-pointer flex flex-col justify-between rounded-2xl border border-[#E5E7EB]/60 bg-white p-4 hover:shadow-xl hover:border-transparent transition-all duration-300">
-                                <div>
-                                    {{-- Image Wrapper --}}
-                                    <div class="aspect-[4/5] bg-gray-50 rounded-xl overflow-hidden relative border border-gray-150/40">
-                                        <img :src="img(item.image)" :alt="item.name" class="w-full h-full object-cover scale-100 group-hover:scale-105 transition-transform duration-500 ease-out" loading="lazy">
-                                        
-                                        {{-- Sale tag --}}
-                                        <div class="absolute top-3 left-3 z-10">
-                                            <span class="rounded border border-[#B88A44] bg-white/95 px-2.5 py-0.5 text-[8px] font-bold text-[#B88A44] uppercase tracking-widest shadow-sm">Sale</span>
+                    <div x-show="savedItems.length > 0">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+                            <template x-for="(item, idx) in savedItems" :key="item.id">
+                                <div class="group relative cursor-pointer flex flex-col justify-between rounded-2xl border border-[#E5E7EB]/60 bg-white p-4 hover:shadow-xl hover:border-transparent transition-all duration-300">
+                                    <div>
+                                        {{-- Image Wrapper --}}
+                                        <div class="aspect-[4/5] bg-gray-50 rounded-xl overflow-hidden relative border border-gray-150/40">
+                                            <img :src="img(item.image)" :alt="item.name" class="w-full h-full object-cover scale-100 group-hover:scale-105 transition-transform duration-500 ease-out" loading="lazy">
+                                            
+                                            {{-- Sale tag --}}
+                                            <div class="absolute top-3 left-3 z-10">
+                                                <span class="rounded border border-[#B88A44] bg-white/95 px-2.5 py-0.5 text-[8px] font-bold text-[#B88A44] uppercase tracking-widest shadow-sm">Sale</span>
+                                            </div>
+
+                                            {{-- Trash Remove Trigger in top right --}}
+                                            <div class="absolute top-3 right-3 z-10 no-card-redirect">
+                                                <button @click="removeItem(item.id)" class="w-8 h-8 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-gray-600 hover:text-red-500 hover:scale-110 shadow-sm transition duration-200 focus:outline-none" aria-label="Remove item">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                                                </button>
+                                            </div>
+
+                                            {{-- Add to Bag Overlay on Hover --}}
+                                            <div class="no-card-redirect absolute inset-x-3 bottom-3 z-10 translate-y-2 opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 transition-all duration-300">
+                                                <button @click="moveToBag(item.id)" class="w-full h-10 rounded-xl bg-[#111827] text-white hover:bg-[#B88A44] text-xs font-bold uppercase tracking-wider transition-colors duration-200 shadow-lg">
+                                                    Add to Bag
+                                                </button>
+                                            </div>
                                         </div>
 
-                                        {{-- Trash Remove Trigger in top right --}}
-                                        <div class="absolute top-3 right-3 z-10 no-card-redirect">
-                                            <button @click="removeItem(item.id)" class="w-8 h-8 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-gray-600 hover:text-red-500 hover:scale-110 shadow-sm transition duration-200 focus:outline-none" aria-label="Remove item">
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                                        {{-- Card details --}}
+                                        <div class="pt-4 space-y-1">
+                                            <span class="text-[9px] text-[#B88A44] font-bold uppercase tracking-widest" x-text="item.brand || 'Premium'"></span>
+                                            <h3 class="font-serif font-bold text-base text-[#111827] hover:text-[#B88A44] transition-colors duration-200 line-clamp-1">
+                                                <a :href="'/product/' + item.slug" x-text="item.name"></a>
+                                            </h3>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-3 border-t border-gray-100 flex items-center justify-between mt-3">
+                                        <div class="flex items-baseline gap-1.5">
+                                            <span class="font-serif font-bold text-sm text-[#B88A44]" x-text="fmt(item.price)"></span>
+                                            <span class="text-xs text-gray-400 line-through" x-text="fmt(item.original_price || item.price * 1.1)"></span>
+                                        </div>
+
+                                        {{-- Mobile Add to Bag Trigger --}}
+                                        <div class="no-card-redirect lg:hidden">
+                                            <button @click="moveToBag(item.id)" class="w-8 h-8 rounded-lg bg-gray-50 border border-gray-150/40 flex items-center justify-center text-gray-700 hover:bg-[#B88A44] hover:text-white transition duration-200">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                                             </button>
                                         </div>
-
-                                        {{-- Add to Bag Overlay on Hover --}}
-                                        <div class="no-card-redirect absolute inset-x-3 bottom-3 z-10 translate-y-2 opacity-0 lg:group-hover:translate-y-0 lg:group-hover:opacity-100 transition-all duration-300">
-                                            <button @click="moveToBag(item.id)" class="w-full h-10 rounded-xl bg-[#111827] text-white hover:bg-[#B88A44] text-xs font-bold uppercase tracking-wider transition-colors duration-200 shadow-lg">
-                                                Add to Bag
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {{-- Card details --}}
-                                    <div class="pt-4 space-y-1">
-                                        <span class="text-[9px] text-[#B88A44] font-bold uppercase tracking-widest" x-text="item.brand || 'Premium'"></span>
-                                        <h3 class="font-serif font-bold text-base text-[#111827] hover:text-[#B88A44] transition-colors duration-200 line-clamp-1">
-                                            <a :href="'/product/' + item.slug" x-text="item.name"></a>
-                                        </h3>
                                     </div>
                                 </div>
+                            </template>
+                        </div>
+                    </div>
 
-                                <div class="pt-3 border-t border-gray-100 flex items-center justify-between mt-3">
-                                    <div class="flex items-baseline gap-1.5">
-                                        <span class="font-serif font-bold text-sm text-[#B88A44]" x-text="fmt(item.price)"></span>
-                                        <span class="text-xs text-gray-400 line-through" x-text="fmt(item.original_price || item.price * 1.1)"></span>
-                                    </div>
-
-                                    {{-- Mobile Add to Bag Trigger --}}
-                                    <div class="no-card-redirect lg:hidden">
-                                        <button @click="moveToBag(item.id)" class="w-8 h-8 rounded-lg bg-gray-50 border border-gray-150/40 flex items-center justify-center text-gray-700 hover:bg-[#B88A44] hover:text-white transition duration-200">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-bag"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
+                    <div x-show="savedItems.length === 0" class="py-6 text-center text-xs text-[#6b6b76] italic">
+                        No saved items. Use "Save for later" on cart items to save them here.
                     </div>
                 </div>
-
-                <div x-show="savedItems.length === 0" class="py-6 text-center text-xs text-[#6b6b76] italic">
-                    No saved items. Use "Save for later" on cart items to save them here.
-                </div>
-            </div>
+            </template>
 
         </div>
         {{-- End main content --}}

@@ -26,6 +26,53 @@ class CheckoutController extends Controller
 
     public function applyCoupon(Request $request)
     {
+        if ($request->expectsJson() || $request->ajax()) {
+            $request->validate([
+                'code' => ['required', 'string'],
+            ]);
+
+            $coupon = Coupon::where('code', strtoupper($request->code))
+                ->where('status', true)
+                ->first();
+
+            if (!$coupon) {
+                return response()->json(['success' => false, 'message' => 'Invalid coupon code.'], 422);
+            }
+
+            $cart = $this->getCartItemsFromDb();
+            $subtotal = 0;
+            foreach ($cart as $item) {
+                $subtotal += $item['price'] * $item['quantity'];
+            }
+
+            if (!$coupon->isValid($subtotal)) {
+                return response()->json(['success' => false, 'message' => 'This coupon is either expired or does not meet minimum cart requirements.'], 422);
+            }
+
+            // Calculate discount
+            $discount = 0;
+            if ($coupon->type === 'percent') {
+                $discount = ($subtotal * $coupon->value) / 100;
+            } else {
+                $discount = $coupon->value;
+            }
+
+            session()->put('coupon', [
+                'code' => $coupon->code,
+                'discount' => (float) $discount,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Coupon applied successfully!',
+                'coupon' => [
+                    'code' => $coupon->code,
+                    'discount' => (float) $discount,
+                ],
+                'totals' => $this->getCheckoutTotals(),
+            ]);
+        }
+
         $request->validate([
             'code' => ['required', 'string'],
         ]);
@@ -67,6 +114,15 @@ class CheckoutController extends Controller
     public function removeCoupon()
     {
         session()->forget('coupon');
+
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Coupon removed successfully.',
+                'totals' => $this->getCheckoutTotals(),
+            ]);
+        }
+
         return back()->with('success', 'Coupon removed successfully.');
     }
 

@@ -622,7 +622,7 @@
     </div>
 
     {{-- Main Content Section (Padded to clear fixed navbar) --}}
-    <main class="flex-grow max-w-7xl w-full mx-auto px-6 sm:px-8 lg:px-12 pt-40 pb-16">
+    <main class="flex-grow max-w-7xl w-full mx-auto px-6 sm:px-8 lg:px-12 pt-32 md:pt-40 pb-16">
         
         @if(session('success'))
             <div class="mb-8 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] p-4 text-xs font-bold text-emerald-800 flex items-center gap-3 shadow-sm shadow-emerald-500/5 font-sans">

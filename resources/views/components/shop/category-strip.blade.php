@@ -17,8 +17,10 @@
 
     /* Outer sticky wrapper — no overflow clipping */
     #category-scroll-container {
+        position: sticky;
+        z-index: 40;
         width: 100%;
-        top: 10px;
+        top: 6px;
         border-bottom: 1px solid rgba(243, 244, 246, 0.8);
         transition: transform 0.3s ease, opacity 0.3s ease;
         will-change: transform, opacity;

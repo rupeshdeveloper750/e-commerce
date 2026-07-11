@@ -97,6 +97,11 @@ class CartController extends Controller
         }
 
         if ($request->has('buy_now')) {
+            if (!auth()->check()) {
+                // Store the checkout URL as intended, so login redirects there
+                session()->put('url.intended', route('store.checkout'));
+                return redirect()->route('login');
+            }
             return redirect()->route('store.checkout')->with('success', 'Product added to cart!');
         }
 

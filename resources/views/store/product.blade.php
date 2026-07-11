@@ -48,7 +48,7 @@ $specs = array_merge([
 
 
 
-<div class="bg-white -mx-6 sm:-mx-8 lg:-mx-12 -mt-12 sm:-mt-20 -mb-16 py-8 md:py-12 min-h-screen pt-6 px-6 sm:px-8 lg:px-12 text-stone-900 lumina-product-page"
+<div class="bg-[#FAF9F6] -mx-6 sm:-mx-8 lg:-mx-12 -mt-12 sm:-mt-20 -mb-16 py-8 md:py-12 min-h-screen pt-6 px-6 sm:px-8 lg:px-12 text-stone-900 lumina-product-page font-sans"
     x-data="{ 
         mainImage: '{{ $product->featuredImage ? asset('storage/' . $product->featuredImage->image_path) : ($product->images->first() ? asset('storage/' . $product->images->first()->image_path) : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600') }}',
         activeAccordion: 'desc',
@@ -123,25 +123,25 @@ $specs = array_merge([
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
 
             {{-- Gallery Column --}}
-            <div class="lg:col-span-5 flex flex-col gap-5">
+            <div class="lg:col-span-5 flex flex-col gap-4">
                 {{-- Main Image Box (Responsive, height-bounded for perfect fitting) --}}
-                <div class="w-full aspect-[4/5] sm:aspect-square lg:h-[480px] bg-[#F3F4F6] rounded-xl flex items-center justify-center p-6 relative overflow-hidden">
+                <div class="w-full aspect-[4/5] sm:aspect-square lg:h-[480px] bg-white border border-[#E5E7EB] rounded-2xl shadow-sm flex items-center justify-center p-6 relative overflow-hidden">
                     <img :src="mainImage" alt="{{ $product->name }}" class="max-h-full max-w-full object-contain transition-transform duration-500 hover:scale-[1.02]" loading="lazy">
                     @if($product->sale_price)
-                    <span class="absolute top-4 left-4 rounded bg-black px-2 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider">Sale</span>
+                    <span class="absolute top-4 left-4 rounded border border-[#B88A44] bg-white/95 px-2.5 py-0.5 text-[8px] font-bold text-[#B88A44] uppercase tracking-widest shadow-sm">Sale</span>
                     @endif
                 </div>
 
                 {{-- Horizontal Thumbnails Row --}}
                 @if($product->images->count() > 0)
-                <div class="grid grid-cols-4 gap-3 sm:gap-4">
+                <div class="grid grid-cols-4 gap-3">
                     @foreach($product->images as $img)
                     <button 
                         @click="mainImage = '{{ asset('storage/' . $img->image_path) }}'"
-                        class="aspect-square w-full rounded-lg bg-[#F3F4F6] border-2 transition-all flex items-center justify-center p-1 overflow-hidden"
-                        :class="mainImage === '{{ asset('storage/' . $img->image_path) }}' ? 'border-black ring-1 ring-black' : 'border-transparent hover:border-gray-300'"
+                        class="aspect-square w-full rounded-xl bg-white border-2 transition-all flex items-center justify-center p-1 overflow-hidden shadow-sm"
+                        :class="mainImage === '{{ asset('storage/' . $img->image_path) }}' ? 'border-[#B88A44] ring-1 ring-[#B88A44]' : 'border-gray-200/60 hover:border-gray-300'"
                     >
-                        <img src="{{ asset('storage/' . $img->image_path) }}" class="max-h-full max-w-full object-contain" alt="Thumbnail">
+                        <img src="{{ asset('storage/' . $img->image_path) }}" class="max-h-full max-w-full object-contain rounded-lg" alt="Thumbnail">
                     </button>
                     @endforeach
                 </div>
@@ -149,22 +149,21 @@ $specs = array_merge([
             </div>
 
             {{-- Product Info Column --}}
-            <div class="lg:col-span-7 space-y-6">
-
+            <div class="lg:col-span-7 space-y-4">
                 {{-- Breadcrumbs --}}
-                <nav class="text-[10px] uppercase tracking-wider text-gray-400 font-bold flex items-center gap-1.5" aria-label="Breadcrumb">
-                    <a href="{{ route('store.home') }}" class="hover:text-black transition-colors">Home</a>
+                <nav class="text-[9px] uppercase tracking-widest text-gray-400 font-bold flex items-center gap-1" aria-label="Breadcrumb">
+                    <a href="{{ route('store.home') }}" class="hover:text-[#B88A44] transition-colors">Home</a>
                     @if($product->category)
-                    <span class="text-gray-300">&gt;</span>
-                    <a href="{{ route('store.shop', ['category' => $product->category->slug]) }}" class="hover:text-black transition-colors">{{ $product->category->name }}</a>
+                    <span class="text-gray-300">/</span>
+                    <a href="{{ route('store.shop', ['category' => $product->category->slug]) }}" class="hover:text-[#B88A44] transition-colors">{{ $product->category->name }}</a>
                     @endif
-                    <span class="text-gray-300">&gt;</span>
+                    <span class="text-gray-300">/</span>
                     <span class="text-gray-900 font-extrabold">{{ $product->name }}</span>
                 </nav>
 
                 {{-- Title & Social Proof --}}
-                <div class="space-y-2">
-                    <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">
+                <div class="space-y-1">
+                    <h1 class="text-2xl font-serif font-black text-gray-900 tracking-tight leading-tight">
                         {{ $product->name }}
                     </h1>
 
@@ -172,15 +171,15 @@ $specs = array_merge([
                         $avgRating = $product->reviews->avg('rating') ?: 4.8;
                         $reviewCount = $product->reviews->count() ?: 124;
                     @endphp
-                    <div class="flex items-center gap-2 text-xs text-gray-500 font-semibold pt-1">
-                        <div class="flex items-center text-black gap-0.5">
+                    <div class="flex items-center gap-2 text-[10px] text-gray-500 font-semibold pt-0.5">
+                        <div class="flex items-center text-[#B88A44] gap-0.5">
                             @for($i = 1; $i <= 5; $i++)
                                 @if($i <= round($avgRating))
-                                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                                    <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
                                         <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                                     </svg>
                                 @else
-                                    <svg class="w-3.5 h-3.5 text-gray-305" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <svg class="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                                     </svg>
                                 @endif
@@ -191,23 +190,23 @@ $specs = array_merge([
                 </div>
 
                 {{-- Price strip --}}
-                <div class="py-4 border-y border-gray-150">
-                    <div class="flex items-baseline gap-3">
+                <div class="py-2 border-y border-gray-150/40">
+                    <div class="flex items-baseline gap-2">
                         <template x-if="variants.length > 0">
-                            <div class="flex items-baseline gap-3">
-                                <span class="text-2xl font-extrabold text-gray-900" x-text="formatPrice(currentPrice)"></span>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-xl font-extrabold text-[#B88A44]" x-text="formatPrice(currentPrice)"></span>
                                 <template x-if="originalPrice">
-                                    <span class="text-sm text-gray-400 line-through font-semibold" x-text="formatPrice(originalPrice)"></span>
+                                    <span class="text-xs text-gray-400 line-through font-semibold" x-text="formatPrice(originalPrice)"></span>
                                 </template>
                             </div>
                         </template>
                         <template x-if="variants.length === 0">
-                            <div class="flex items-baseline gap-3">
+                            <div class="flex items-baseline gap-2">
                                 @if($product->sale_price)
-                                <span class="text-2xl font-extrabold text-gray-900">₹{{ number_format($product->sale_price, 2) }}</span>
-                                <span class="text-sm text-gray-400 line-through font-semibold">₹{{ number_format($product->price, 2) }}</span>
+                                <span class="text-xl font-extrabold text-[#B88A44]">₹{{ number_format($product->sale_price, 2) }}</span>
+                                <span class="text-xs text-gray-400 line-through font-semibold">₹{{ number_format($product->price, 2) }}</span>
                                 @else
-                                <span class="text-2xl font-extrabold text-gray-900">₹{{ number_format($product->price, 2) }}</span>
+                                <span class="text-xl font-extrabold text-[#B88A44]">₹{{ number_format($product->price, 2) }}</span>
                                 @endif
                             </div>
                         </template>
@@ -215,28 +214,28 @@ $specs = array_merge([
                 </div>
 
                 {{-- Description --}}
-                <p class="text-sm text-gray-500 leading-relaxed font-medium">
+                <p class="text-xs text-gray-500 leading-relaxed font-medium">
                     {{ $product->short_description ?? 'Experience unparalleled clarity and performance, featuring a meticulously crafted design for all-day comfort.' }}
                 </p>
 
                 {{-- Dynamic Variant Selector --}}
                 @if(count($productAttributes) > 0)
-                <div class="border-t border-gray-150 pt-5 space-y-4">
+                <div class="border-t border-gray-150/30 pt-3 space-y-3">
                     @foreach($productAttributes as $attrName => $values)
-                    <div class="space-y-2.5">
-                        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <div class="space-y-1.5">
+                        <div class="text-[8px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
                             <span>Select {{ ucfirst($attrName) }}:</span>
                             <span class="text-gray-900 font-extrabold capitalize" x-text="selectedAttributes['{{ $attrName }}'] || 'None'"></span>
                         </div>
                         
                         @if(str_contains($attrName, 'color') || str_contains($attrName, 'finish') || str_contains($attrName, 'stain'))
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2">
                             @foreach($values as $valKey => $valData)
                             @php
                                 $colorMap = [
                                     'silver' => '#E5E7EB',
                                     'space-gray' => '#4B5563',
-                                    'gold' => '#F59E0B',
+                                    'gold' => '#B88A44',
                                     'cream' => '#F3EFE9',
                                     'tan' => '#D2B48C',
                                     'dark' => '#1F2937',
@@ -254,22 +253,22 @@ $specs = array_merge([
                             <button
                                 @click="selectedAttributes['{{ $attrName }}'] = '{{ strtolower($valData['value']) }}'"
                                 type="button"
-                                class="w-8 h-8 rounded-full border flex items-center justify-center transition-all focus:outline-none"
-                                :class="selectedAttributes['{{ $attrName }}'] === '{{ strtolower($valData['value']) }}' ? 'border-black ring-1 ring-black' : 'border-transparent hover:scale-105'"
+                                class="w-6 h-6 rounded-full border flex items-center justify-center transition-all focus:outline-none"
+                                :class="selectedAttributes['{{ $attrName }}'] === '{{ strtolower($valData['value']) }}' ? 'border-[#B88A44] ring-1 ring-[#B88A44]' : 'border-transparent hover:scale-105'"
                                 title="{{ ucfirst($valData['value']) }}"
                             >
-                                <span class="w-6 h-6 rounded-full block border border-black/5" style="background-color: {{ $hex }}"></span>
+                                <span class="w-4 h-4 rounded-full block border border-black/5" style="background-color: {{ $hex }}"></span>
                             </button>
                             @endforeach
                         </div>
                         @else
-                        <div class="flex items-center gap-2 flex-wrap">
+                        <div class="flex items-center gap-1.5 flex-wrap">
                             @foreach($values as $valKey => $valData)
                             <button
                                 @click="selectedAttributes['{{ $attrName }}'] = '{{ strtolower($valData['value']) }}'"
                                 type="button"
-                                class="px-4 py-2 rounded border text-xs font-bold uppercase tracking-wider transition-all focus:outline-none"
-                                :class="selectedAttributes['{{ $attrName }}'] === '{{ strtolower($valData['value']) }}' ? 'bg-black text-white border-black' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-450'"
+                                class="px-3 py-1 rounded-lg border text-[9px] font-bold uppercase tracking-wider transition-all focus:outline-none"
+                                :class="selectedAttributes['{{ $attrName }}'] === '{{ strtolower($valData['value']) }}' ? 'bg-[#111827] text-white border-[#111827]' : 'bg-white text-gray-700 border-gray-200 hover:border-gray-355'"
                             >
                                 {{ $valData['value'] }}
                             </button>
@@ -283,13 +282,13 @@ $specs = array_merge([
 
                 {{-- Variant Specifications Panel --}}
                 <template x-if="selectedVariant">
-                    <div class="flex items-center gap-4 text-[10px] font-bold text-gray-400 bg-gray-50 px-4 py-2.5 rounded-lg border border-gray-150 transition-all duration-300">
-                        <div class="flex items-center gap-1.5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-black"></span>
+                    <div class="flex items-center gap-3 text-[8px] font-bold text-gray-400 bg-white px-3 py-2 rounded-xl border border-gray-150/40 transition-all duration-300 shadow-sm w-max">
+                        <div class="flex items-center gap-1">
+                            <span class="w-1 h-1 rounded-full bg-[#B88A44]"></span>
                             <span>SKU: <span class="text-gray-900 font-mono uppercase" x-text="selectedVariant.sku"></span></span>
                         </div>
                         <div class="text-gray-200 font-normal">|</div>
-                        <div class="flex items-center gap-1.5">
+                        <div class="flex items-center gap-1">
                             <span :class="selectedVariant.quantity > 0 ? 'bg-emerald-500' : 'bg-red-500'" class="w-1.5 h-1.5 rounded-full"></span>
                             <span>Stock: <span :class="selectedVariant.quantity > 0 ? 'text-emerald-700' : 'text-red-600'" class="font-extrabold" x-text="selectedVariant.quantity > 0 ? selectedVariant.quantity + ' Units available' : 'Out of Stock'"></span></span>
                         </div>
@@ -297,35 +296,35 @@ $specs = array_merge([
                 </template>
 
                 {{-- Action Buttons & Quantity Form --}}
-                <div class="border-t border-gray-150 pt-5">
-                    <form action="{{ route('store.cart.add', $product->id) }}" id="product-purchase-form" method="POST" class="space-y-6">
+                <div class="border-t border-gray-150/30 pt-3">
+                    <form action="{{ route('store.cart.add', $product->id) }}" id="product-purchase-form" method="POST" class="space-y-4">
                         @csrf
                         <input type="hidden" name="quantity" :value="quantity">
                         <input type="hidden" name="variant_id" :value="selectedVariant ? selectedVariant.id : ''">
 
                         {{-- Quantity Stepper --}}
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Quantity</label>
-                            <div class="h-10 w-32 flex items-center border border-gray-300 rounded-md overflow-hidden bg-white">
-                                <button type="button" @click="if(quantity > 1) quantity--" class="w-10 h-full flex items-center justify-center text-gray-500 hover:text-black font-semibold focus:outline-none transition active:scale-95">-</button>
+                        <div class="space-y-1">
+                            <label class="text-[8px] font-bold text-gray-400 uppercase tracking-widest block">Quantity</label>
+                            <div class="h-8 w-28 flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
+                                <button type="button" @click="if(quantity > 1) quantity--" class="w-8 h-full flex items-center justify-center text-gray-500 hover:text-black font-semibold focus:outline-none transition active:scale-95 text-xs">-</button>
                                 <span class="flex-1 text-center text-xs font-bold text-gray-900" x-text="quantity"></span>
-                                <button type="button" @click="if(quantity < maxQuantity) quantity++" class="w-10 h-full flex items-center justify-center text-gray-500 hover:text-black font-semibold focus:outline-none transition active:scale-95">+</button>
+                                <button type="button" @click="if(quantity < maxQuantity) quantity++" class="w-8 h-full flex items-center justify-center text-gray-500 hover:text-black font-semibold focus:outline-none transition active:scale-95 text-xs">+</button>
                             </div>
                         </div>
 
                         {{-- Cart Actions --}}
-                        @if($product->quantity > 0)
-                        <div class="flex flex-col sm:flex-row gap-4 pt-2">
-                            <button type="submit" class="w-full sm:flex-1 h-12 bg-black hover:bg-neutral-900 text-white text-xs font-bold uppercase tracking-widest rounded transition duration-300">
+                        @if($product->quantity > 0 || $product->variants->sum('quantity') > 0)
+                        <div class="flex flex-col sm:flex-row gap-3 pt-1">
+                            <button type="submit" class="w-full sm:flex-1 h-10 bg-gray-900 hover:bg-[#B88A44] text-white text-[10px] font-bold uppercase tracking-widest rounded-lg transition duration-300 shadow-sm active:scale-98">
                                 Add to Cart
                             </button>
-                            <button type="submit" name="buy_now" value="1" class="w-full sm:flex-1 h-12 bg-white border border-gray-300 hover:bg-gray-50 text-black text-xs font-bold uppercase tracking-widest rounded transition duration-300">
+                            <button type="submit" name="buy_now" value="1" class="w-full sm:flex-1 h-10 bg-white border border-[#B88A44] hover:bg-[#B88A44] text-[#B88A44] hover:text-white text-[10px] font-bold uppercase tracking-widest rounded-lg transition duration-300 shadow-sm active:scale-98">
                                 Buy Now
                             </button>
                         </div>
                         @else
-                        <div class="pt-2">
-                            <button type="button" disabled class="w-full h-12 bg-gray-200 text-gray-400 text-xs font-bold uppercase tracking-widest rounded cursor-not-allowed">
+                        <div class="pt-1">
+                            <button type="button" disabled class="w-full h-10 bg-gray-250 text-gray-400 text-[10px] font-bold uppercase tracking-widest rounded-lg cursor-not-allowed">
                                 Out of Stock
                             </button>
                         </div>
@@ -334,58 +333,55 @@ $specs = array_merge([
                 </div>
 
                 {{-- Trust Checklist --}}
-                <div class="border-t border-gray-150 pt-5 space-y-3.5">
-                    <div class="flex items-center gap-3 text-xs text-gray-600 font-medium">
-                        <svg class="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <div class="border-t border-gray-150/30 pt-3 space-y-2">
+                    <div class="flex items-center gap-2 text-[10px] text-gray-650 font-medium">
+                        <svg class="w-4 h-4 text-[#B88A44] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
                         </svg>
                         <span>Free standard shipping on orders over ₹999</span>
                     </div>
-                    <div class="flex items-center gap-3 text-xs text-gray-600 font-medium">
-                        <svg class="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <div class="flex items-center gap-2 text-[10px] text-gray-650 font-medium">
+                        <svg class="w-4 h-4 text-[#B88A44] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                         </svg>
                         <span>2-year limited warranty included</span>
                     </div>
-                    <div class="flex items-center gap-3 text-xs text-gray-600 font-medium">
-                        <svg class="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <div class="flex items-center gap-2 text-[10px] text-gray-650 font-medium">
+                        <svg class="w-4 h-4 text-[#B88A44] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2"/>
                         </svg>
                         <span>30-day hassle-free returns</span>
                     </div>
                 </div>
-
             </div>
-
         </div>
-
-        {{-- Tabs Component --}}
+              {{-- Tabs Component --}}
         <div class="border-t border-gray-200 mt-16 pt-12" x-data="{ currentTab: 'overview' }">
             {{-- Tab Headers --}}
             <div class="flex border-b border-gray-200 gap-8 justify-start">
                 <button 
                     @click="currentTab = 'overview'" 
                     class="pb-3 text-xs font-bold uppercase tracking-widest transition-all focus:outline-none relative"
-                    :class="currentTab === 'overview' ? 'text-black' : 'text-gray-400 hover:text-black'"
+                    :class="currentTab === 'overview' ? 'text-[#B88A44]' : 'text-gray-400 hover:text-black'"
                 >
                     <span>Overview</span>
-                    <div x-show="currentTab === 'overview'" class="absolute bottom-0 left-0 right-0 h-[2px] bg-black"></div>
+                    <div x-show="currentTab === 'overview'" class="absolute bottom-0 left-0 right-0 h-[2px] bg-[#B88A44]"></div>
                 </button>
                 <button 
                     @click="currentTab = 'specifications'" 
                     class="pb-3 text-xs font-bold uppercase tracking-widest transition-all focus:outline-none relative"
-                    :class="currentTab === 'specifications' ? 'text-black' : 'text-gray-400 hover:text-black'"
+                    :class="currentTab === 'specifications' ? 'text-[#B88A44]' : 'text-gray-400 hover:text-black'"
                 >
                     <span>Specifications</span>
-                    <div x-show="currentTab === 'specifications'" class="absolute bottom-0 left-0 right-0 h-[2px] bg-black"></div>
+                    <div x-show="currentTab === 'specifications'" class="absolute bottom-0 left-0 right-0 h-[2px] bg-[#B88A44]"></div>
                 </button>
                 <button 
                     @click="currentTab = 'shipping'" 
                     class="pb-3 text-xs font-bold uppercase tracking-widest transition-all focus:outline-none relative"
-                    :class="currentTab === 'shipping' ? 'text-black' : 'text-gray-400 hover:text-black'"
+                    :class="currentTab === 'shipping' ? 'text-[#B88A44]' : 'text-gray-400 hover:text-black'"
                 >
                     <span>Shipping Info</span>
-                    <div x-show="currentTab === 'shipping'" class="absolute bottom-0 left-0 right-0 h-[2px] bg-black"></div>
+                    <div x-show="currentTab === 'shipping'" class="absolute bottom-0 left-0 right-0 h-[2px] bg-[#B88A44]"></div>
                 </button>
             </div>
 
@@ -394,13 +390,13 @@ $specs = array_merge([
                 {{-- Overview Tab --}}
                 <div x-show="currentTab === 'overview'" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                     <div class="lg:col-span-5 space-y-4">
-                        <h3 class="text-2xl font-bold text-gray-900">Sound, Redefined.</h3>
-                        <p class="text-sm text-gray-500 leading-relaxed font-medium">
+                        <h3 class="text-2xl font-serif font-black text-gray-900 leading-tight">Artisanship &amp; Innovation</h3>
+                        <p class="text-sm text-gray-550 leading-relaxed font-medium">
                             {{ $product->description ?? 'This product represents the pinnacle of our design engineering. Crafted with attention to detail and utilizing aerospace-grade materials, it offers an outstanding visual and functional experience for daily use.' }}
                         </p>
                     </div>
                     <div class="lg:col-span-7">
-                        <div class="w-full rounded-xl overflow-hidden shadow-sm bg-[#F3F4F6] flex items-center justify-center p-6">
+                        <div class="w-full rounded-2xl overflow-hidden shadow-sm bg-white border border-[#E5E7EB] flex items-center justify-center p-6">
                             <img src="{{ $product->images->count() > 1 ? asset('storage/' . $product->images[1]->image_path) : ($product->featuredImage ? asset('storage/' . $product->featuredImage->image_path) : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80') }}" class="max-h-[300px] object-contain rounded-lg" alt="Product Detail Banner">
                         </div>
                     </div>
@@ -413,7 +409,7 @@ $specs = array_merge([
                             @foreach($specs as $key => $val)
                             <tr class="border-b border-gray-100">
                                 <td class="py-3.5 font-bold text-gray-800 w-1/3">{{ $key }}</td>
-                                <td class="py-3.5 text-gray-500">{{ $val }}</td>
+                                <td class="py-3.5 text-gray-500 font-semibold">{{ $val }}</td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -421,7 +417,7 @@ $specs = array_merge([
                 </div>
 
                 {{-- Shipping Tab --}}
-                <div x-show="currentTab === 'shipping'" class="max-w-2xl text-sm text-gray-500 leading-relaxed space-y-4 font-medium">
+                <div x-show="currentTab === 'shipping'" class="max-w-2xl text-sm text-gray-550 leading-relaxed space-y-4 font-medium">
                     <p>Standard delivery is free on all orders above ₹999. Orders are shipped in plastic-free recycled boxes and arrive within 2-4 business days.</p>
                     <p>Easy returns are available within 7 days of delivery. For items with a manufacturer's warranty, details are enclosed inside the product packaging.</p>
                 </div>
@@ -430,13 +426,13 @@ $specs = array_merge([
 
         {{-- Reviews Section --}}
         <div class="border-t border-gray-200 mt-16 pt-12">
-            <h2 class="text-2xl font-bold text-gray-900 mb-8">Customer Reviews</h2>
+            <h2 class="text-2xl font-serif font-black text-gray-900 mb-8">Customer Reviews</h2>
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
                 
                 {{-- Rating Summary --}}
-                <div class="lg:col-span-4 bg-[#F9FAF9] border border-gray-200 rounded-xl p-8 flex flex-col items-center justify-center text-center">
+                <div class="lg:col-span-4 bg-white border border-[#E5E7EB] rounded-2xl p-8 flex flex-col items-center justify-center text-center shadow-sm">
                     <span class="text-6xl font-extrabold text-gray-900 mb-2">4.8</span>
-                    <div class="flex items-center text-black gap-0.5 mb-2">
+                    <div class="flex items-center text-[#B88A44] gap-0.5 mb-2">
                         @for($i = 1; $i <= 5; $i++)
                         <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
                             <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
@@ -454,15 +450,15 @@ $specs = array_merge([
 
                     @if($reviews->count() > 0)
                         @foreach($reviews as $rev)
-                        <div class="border-b border-gray-150 pb-6">
+                        <div class="border-b border-gray-100 pb-6">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <span class="text-sm font-bold text-gray-900">{{ $rev->user->name }}</span>
                                     <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider ml-3">{{ $rev->created_at->format('F d, Y') }}</span>
                                 </div>
-                                <div class="flex text-black gap-0.5">
+                                <div class="flex text-[#B88A44] gap-0.5">
                                     @for($i = 1; $i <= 5; $i++)
-                                    <svg class="w-3.5 h-3.5 {{ $i <= $rev->rating ? 'fill-current' : 'text-gray-300' }}" viewBox="0 0 24 24" fill="{{ $i <= $rev->rating ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="1.5">
+                                    <svg class="w-3.5 h-3.5 {{ $i <= $rev->rating ? 'fill-current' : 'text-gray-200' }}" viewBox="0 0 24 24" fill="{{ $i <= $rev->rating ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="1.5">
                                         <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
                                     </svg>
                                     @endfor
@@ -474,13 +470,13 @@ $specs = array_merge([
                         @endforeach
                     @else
                         {{-- Mock Reviews exactly as shown in screenshot --}}
-                        <div class="border-b border-gray-150 pb-6">
+                        <div class="border-b border-gray-100 pb-6">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <span class="text-sm font-bold text-gray-900">Alex M.</span>
                                     <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider ml-3">October 12, 2023</span>
                                 </div>
-                                <div class="flex text-black gap-0.5">
+                                <div class="flex text-[#B88A44] gap-0.5">
                                     @for($i = 1; $i <= 5; $i++)
                                     <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
                                         <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
@@ -492,13 +488,13 @@ $specs = array_merge([
                             <p class="text-xs text-gray-500 leading-relaxed font-medium mt-1">I've owned many high-end headphones, but this model stands out. The drivers provide incredible clarity in the highs without being harsh, and the bass is tight and controlled. The noise cancellation is also top-tier.</p>
                         </div>
 
-                        <div class="border-b border-gray-150 pb-6">
+                        <div class="border-b border-gray-100 pb-6">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <span class="text-sm font-bold text-gray-900">Sarah J.</span>
                                     <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider ml-3">September 28, 2023</span>
                                 </div>
-                                <div class="flex text-black gap-0.5">
+                                <div class="flex text-[#B88A44] gap-0.5">
                                     @for($i = 1; $i <= 5; $i++)
                                     <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
                                         <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
@@ -512,23 +508,23 @@ $specs = array_merge([
                     @endif
 
                     <div class="pt-4">
-                        <a href="#" class="text-xs font-bold text-gray-900 hover:text-gray-600 flex items-center gap-2 tracking-wider uppercase">
+                        <a href="#" class="text-[10px] font-bold text-gray-900 hover:text-[#B88A44] flex items-center gap-2 tracking-wider uppercase transition-colors">
                             <span>View All Reviews</span>
-                            <svg class="w-3.5 h-3.5 animate-pulse" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                             </svg>
                         </a>
                     </div>
 
                     {{-- Submission form --}}
-                    <div class="bg-[#F9FAF9] border border-gray-200 rounded-xl p-6 space-y-4 mt-8">
-                        <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Write a review</h4>
+                    <div class="bg-white border border-[#E5E7EB] rounded-2xl p-6 space-y-4 mt-8 shadow-sm">
+                        <h4 class="text-xs font-bold text-gray-900 uppercase tracking-widest">Write a review</h4>
                         @auth
                         <form action="{{ route('store.product.review', $product->id) }}" method="POST" class="space-y-4">
                             @csrf
                             <div>
-                                <label for="rating" class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Rating</label>
-                                <select id="rating" name="rating" class="w-full h-10 bg-white border border-gray-300 rounded px-3 text-xs font-semibold text-gray-700 focus:outline-none">
+                                <label for="rating" class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Rating</label>
+                                <select id="rating" name="rating" class="w-full h-10 bg-[#FCFCFC] border border-gray-205 rounded-xl px-3 text-xs font-semibold text-gray-700 focus:border-[#B88A44] focus:ring-0 focus:outline-none transition">
                                     <option value="5">5 Stars (Excellent)</option>
                                     <option value="4">4 Stars (Good)</option>
                                     <option value="3">3 Stars (Average)</option>
@@ -537,10 +533,10 @@ $specs = array_merge([
                                 </select>
                             </div>
                             <div>
-                                <label for="comment" class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Comment</label>
-                                <textarea id="comment" name="comment" rows="4" placeholder="Share your experience..." class="w-full bg-white border border-gray-300 rounded p-3 text-xs text-gray-700 resize-none focus:outline-none font-medium"></textarea>
+                                <label for="comment" class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Comment</label>
+                                <textarea id="comment" name="comment" rows="4" placeholder="Share your experience..." class="w-full bg-[#FCFCFC] border border-gray-205 rounded-xl p-3 text-xs text-gray-700 resize-none focus:border-[#B88A44] focus:ring-0 focus:outline-none transition font-medium"></textarea>
                             </div>
-                            <button type="submit" class="w-full h-10 bg-black hover:bg-neutral-900 text-white text-xs font-bold uppercase tracking-widest rounded transition duration-200">
+                            <button type="submit" class="w-full h-11 bg-gray-900 hover:bg-[#B88A44] text-white text-[11px] font-bold uppercase tracking-widest rounded-xl transition duration-200 active:scale-98 shadow-sm">
                                 Submit Review
                             </button>
                         </form>
@@ -559,7 +555,7 @@ $specs = array_merge([
         @if($relatedProducts->count() > 0)
         <div class="space-y-8 border-t border-gray-200 pt-12">
             <div class="space-y-1">
-                <h3 class="text-2xl font-extrabold text-gray-900">Frequently Bought Together</h3>
+                <h3 class="text-2xl font-serif font-black text-gray-900">Frequently Bought Together</h3>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

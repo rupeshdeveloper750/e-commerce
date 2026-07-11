@@ -19,16 +19,22 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login');
     }
 
-    /**
-     * Handle an incoming authentication request.
-     */
     public function store(LoginRequest $request): RedirectResponse
     {
+        $oldSessionId = session()->getId();
+
         $request->authenticate();
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Associate guest cart items with the authenticated user
+        if (Auth::check()) {
+            \App\Models\CartItem::where('session_id', $oldSessionId)
+                ->whereNull('user_id')
+                ->update(['user_id' => Auth::id()]);
+        }
+
+        return redirect()->intended(route('user.dashboard'));
     }
 
     /**
