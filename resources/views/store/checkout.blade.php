@@ -621,59 +621,75 @@ if (!function_exists('getCheckoutItemImage')) {
                         </div>
 
                         {{-- Coupon code section --}}
-                        <div class="space-y-3 border-t border-gray-100 pt-4">
+                        <div id="coupon-section" class="space-y-3 border-t border-gray-100 pt-4">
                             @if(session()->has('coupon'))
-                                <div class="flex items-center justify-between bg-green-50 border border-green-150 text-green-700 px-3.5 py-2.5 rounded-xl text-xs font-bold transition duration-300">
+                                {{-- Applied state --}}
+                                <div id="coupon-applied" class="flex items-center justify-between bg-green-50 border border-green-150 text-green-700 px-3.5 py-2.5 rounded-xl text-xs font-bold">
                                     <div class="flex items-center gap-1.5 font-sans">
                                         <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        <span>Applied: <span class="uppercase font-extrabold tracking-wider text-green-800">{{ session()->get('coupon.code') }}</span></span>
+                                        <span>Applied: <span id="applied-code" class="uppercase font-extrabold tracking-wider text-green-800">{{ session()->get('coupon.code') }}</span></span>
                                     </div>
-                                    <a href="{{ route('store.coupon.remove') }}" class="text-[10px] uppercase font-extrabold text-red-500 hover:underline">
+                                    <button type="button" id="coupon-remove-btn" class="text-[10px] uppercase font-extrabold text-red-500 hover:underline focus:outline-none">
                                         Remove
-                                    </a>
+                                    </button>
                                 </div>
+                                <div id="coupon-input-wrap" class="hidden space-y-1 font-sans">
                             @else
-                                <div class="space-y-1 font-sans">
+                                <div id="coupon-applied" class="hidden flex items-center justify-between bg-green-50 border border-green-150 text-green-700 px-3.5 py-2.5 rounded-xl text-xs font-bold">
+                                    <div class="flex items-center gap-1.5 font-sans">
+                                        <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <span>Applied: <span id="applied-code" class="uppercase font-extrabold tracking-wider text-green-800"></span></span>
+                                    </div>
+                                    <button type="button" id="coupon-remove-btn" class="text-[10px] uppercase font-extrabold text-red-500 hover:underline focus:outline-none">
+                                        Remove
+                                    </button>
+                                </div>
+                                <div id="coupon-input-wrap" class="space-y-1 font-sans">
+                            @endif
                                     <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest">Apply Promo Code</label>
                                     <div class="flex gap-2">
-                                        <input 
-                                            type="text" 
-                                            form="coupon-form" 
-                                            name="code" 
-                                            placeholder="ENTER CODE" 
+                                        <input
+                                            type="text"
+                                            id="coupon-code-input"
+                                            placeholder="ENTER CODE"
                                             class="flex-grow h-9 px-3.5 text-xs font-extrabold uppercase tracking-widest text-gray-900 bg-[#FCFCFC] border border-gray-205 rounded-xl focus:border-[#B88A44] focus:ring-0 focus:outline-none transition"
                                         >
-                                        <button 
-                                            type="submit" 
-                                            form="coupon-form" 
+                                        <button
+                                            type="button"
+                                            id="coupon-apply-btn"
                                             class="h-9 px-4 text-xs font-bold text-white bg-[#B88A44] hover:bg-[#a67c3b] rounded-xl transition shadow-sm active:scale-95 focus:outline-none"
                                         >
                                             Apply
                                         </button>
                                     </div>
+                                    <p id="coupon-msg" class="text-[10px] font-semibold hidden"></p>
                                 </div>
-                            @endif
                         </div>
 
                         {{-- Total calculations --}}
                         <div class="border-t border-gray-100 pt-4 space-y-2.5 text-xs text-gray-500 font-semibold font-sans">
                             <div class="flex justify-between">
                                 <span>Subtotal</span>
-                                <span class="text-gray-900 font-bold">₹{{ number_format($totals['subtotal'], 2) }}</span>
+                                <span id="summary-subtotal" class="text-gray-900 font-bold">₹{{ number_format($totals['subtotal'], 2) }}</span>
                             </div>
                             @if($totals['discount'] > 0)
-                                <div class="flex justify-between">
+                                <div id="summary-discount-row" class="flex justify-between">
                                     <span>Promo Discount</span>
-                                    <span class="text-red-500 font-bold">-₹{{ number_format($totals['discount'], 2) }}</span>
+                                    <span id="summary-discount" class="text-red-500 font-bold">-₹{{ number_format($totals['discount'], 2) }}</span>
+                                </div>
+                            @else
+                                <div id="summary-discount-row" class="hidden flex justify-between">
+                                    <span>Promo Discount</span>
+                                    <span id="summary-discount" class="text-red-500 font-bold"></span>
                                 </div>
                             @endif
                             <div class="flex justify-between">
                                 <span>Shipping Handling</span>
-                                <span class="text-gray-900 font-bold">₹{{ number_format($totals['shipping'], 2) }}</span>
+                                <span id="summary-shipping" class="text-gray-900 font-bold">₹{{ number_format($totals['shipping'], 2) }}</span>
                             </div>
                             <div class="border-t border-gray-100 pt-3 flex justify-between text-sm font-black text-gray-900">
                                 <span>Grand Total</span>
-                                <span class="text-[#B88A44]">₹{{ number_format($totals['total'], 2) }}</span>
+                                <span class="summary-total text-[#B88A44]">₹{{ number_format($totals['total'], 2) }}</span>
                             </div>
                         </div>
 
@@ -709,10 +725,9 @@ if (!function_exists('getCheckoutItemImage')) {
 
         </form>
 
-        {{-- Dummy coupon apply helper form --}}
-        <form id="coupon-form" action="{{ route('store.coupon.apply') }}" method="POST" class="hidden">
-            @csrf
-        </form>
+        {{-- Coupon routes for JS --}}
+        <span id="coupon-apply-url" data-url="{{ route('store.coupon.apply') }}" class="hidden"></span>
+        <span id="coupon-remove-url" data-url="{{ route('store.coupon.remove') }}" class="hidden"></span>
     </div>
 </div>
 
@@ -834,5 +849,117 @@ if (!function_exists('getCheckoutItemImage')) {
             });
         }
     });
+
+    // ── AJAX Coupon Apply / Remove ─────────────────────────────────────────
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+        || document.querySelector('input[name="_token"]')?.value || '';
+
+    function updateTotalsUI(totals) {
+        // Subtotal
+        const subEl = document.getElementById('summary-subtotal');
+        if (subEl) subEl.textContent = '₹' + Number(totals.subtotal).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+        // Discount row
+        const discountRow = document.getElementById('summary-discount-row');
+        const discountEl  = document.getElementById('summary-discount');
+        if (discountRow && discountEl) {
+            if (totals.discount > 0) {
+                discountEl.textContent = '-₹' + Number(totals.discount).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+                discountRow.classList.remove('hidden');
+            } else {
+                discountRow.classList.add('hidden');
+            }
+        }
+        // Shipping
+        const shipEl = document.getElementById('summary-shipping');
+        if (shipEl) shipEl.textContent = totals.shipping === 0 ? '₹0.00' : '₹' + Number(totals.shipping).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+        // Grand Total (all instances)
+        document.querySelectorAll('.summary-total').forEach(el => {
+            el.textContent = '₹' + Number(totals.total).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+        });
+    }
+
+    function showCouponApplied(code) {
+        document.getElementById('applied-code').textContent = code;
+        document.getElementById('coupon-applied').classList.remove('hidden');
+        document.getElementById('coupon-input-wrap').classList.add('hidden');
+    }
+
+    function showCouponInput() {
+        document.getElementById('coupon-applied').classList.add('hidden');
+        document.getElementById('coupon-input-wrap').classList.remove('hidden');
+        const inp = document.getElementById('coupon-code-input');
+        if (inp) inp.value = '';
+    }
+
+    function setCouponMsg(msg, isError) {
+        const el = document.getElementById('coupon-msg');
+        if (!el) return;
+        el.textContent = msg;
+        el.className = 'text-[10px] font-semibold mt-0.5 ' + (isError ? 'text-red-500' : 'text-green-600');
+        el.classList.remove('hidden');
+        setTimeout(() => el.classList.add('hidden'), 4000);
+    }
+
+    // Apply coupon
+    const applyBtn = document.getElementById('coupon-apply-btn');
+    if (applyBtn) {
+        applyBtn.addEventListener('click', function () {
+            const code = document.getElementById('coupon-code-input').value.trim();
+            if (!code) { setCouponMsg('Please enter a coupon code.', true); return; }
+
+            applyBtn.disabled = true;
+            applyBtn.textContent = '...';
+
+            fetch(document.getElementById('coupon-apply-url').dataset.url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({ code })
+            })
+            .then(r => r.json())
+            .then(data => {
+                applyBtn.disabled = false;
+                applyBtn.textContent = 'Apply';
+                if (data.success) {
+                    showCouponApplied(data.coupon.code);
+                    updateTotalsUI(data.totals);
+                } else {
+                    setCouponMsg(data.message || 'Invalid coupon.', true);
+                }
+            })
+            .catch(() => {
+                applyBtn.disabled = false;
+                applyBtn.textContent = 'Apply';
+                setCouponMsg('Something went wrong. Try again.', true);
+            });
+        });
+
+        // Allow Enter key
+        document.getElementById('coupon-code-input')?.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); applyBtn.click(); }
+        });
+    }
+
+    // Remove coupon
+    const removeBtn = document.getElementById('coupon-remove-btn');
+    if (removeBtn) {
+        removeBtn.addEventListener('click', function () {
+            fetch(document.getElementById('coupon-remove-url').dataset.url, {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showCouponInput();
+                    updateTotalsUI(data.totals);
+                }
+            })
+            .catch(() => {});
+        });
+    }
 </script>
 @endsection
