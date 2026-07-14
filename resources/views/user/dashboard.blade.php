@@ -205,9 +205,121 @@
         },
         downloadInvoice(orderNum) {
             this.triggerToast('Preparing invoice download for #' + orderNum + '...', 'info');
+            
+            const invoiceWindow = window.open('', '_blank');
+            if (!invoiceWindow) {
+                this.triggerToast('Popup blocked! Please allow popups to download the invoice.', 'error');
+                return;
+            }
+
+            const today = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            const productName = this.trackDetails?.product?.name || 'ShopMe Premium Purchase';
+            const productPrice = this.trackDetails?.product?.price || '₹4,795.00';
+            const productQty = this.trackDetails?.product?.quantity || 1;
+            const address = this.trackDetails?.address || 'Roopesh Kumar, 124 Luxury Boulevard, Bandra West, Mumbai, MH - 400050';
+            const customerName = address.split(',')[0] || 'Customer';
+
+            invoiceWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Invoice - ${orderNum}</title>
+                    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+                    <style>
+                        @media print {
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body class="bg-gray-50 font-sans p-6 md:p-12">
+                    <div class="max-w-3xl mx-auto bg-white p-8 border border-gray-200 rounded-2xl shadow-sm relative">
+                        <!-- Print Button -->
+                        <div class="no-print absolute top-6 right-6">
+                            <button onclick="window.print()" class="bg-[#B88A44] hover:bg-[#A77933] text-white font-bold py-2 px-4 rounded-xl transition text-xs shadow-md">
+                                Print / Save PDF
+                            </button>
+                        </div>
+
+                        <!-- Invoice Header -->
+                        <div class="flex justify-between items-start border-b border-gray-100 pb-8">
+                            <div>
+                                <h1 class="text-3xl font-serif font-black text-[#B88A44]">ShopMe</h1>
+                                <p class="text-xs text-gray-500 mt-1">Quiet Luxury E-Commerce</p>
+                            </div>
+                            <div class="text-right">
+                                <h2 class="text-xl font-bold text-gray-900">INVOICE</h2>
+                                <p class="text-xs text-gray-500 mt-1">Invoice #: ${orderNum}</p>
+                                <p class="text-xs text-gray-500">Date: ${today}</p>
+                            </div>
+                        </div>
+
+                        <!-- Addresses -->
+                        <div class="grid grid-cols-2 gap-8 py-8 border-b border-gray-100 text-xs">
+                            <div>
+                                <h3 class="font-bold text-gray-400 uppercase tracking-wider mb-2">Billed To:</h3>
+                                <p class="font-bold text-gray-800 text-sm">${customerName}</p>
+                                <p class="text-gray-600 mt-1">${address.split(',').slice(1).join(',').trim()}</p>
+                            </div>
+                            <div class="text-right">
+                                <h3 class="font-bold text-gray-400 uppercase tracking-wider mb-2">Shipped From:</h3>
+                                <p class="font-bold text-gray-800 text-sm">ShopMe Warehouse</p>
+                                <p class="text-gray-600 mt-1">Corporate Office, Level 12, Capital Towers,<br>Bandra Kurla Complex, Mumbai - 400051</p>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <table class="w-full text-left border-collapse my-8 text-xs">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="py-3 font-bold text-gray-400 uppercase tracking-wider">Item Description</th>
+                                    <th class="py-3 text-center font-bold text-gray-400 uppercase tracking-wider">Quantity</th>
+                                    <th class="py-3 text-right font-bold text-gray-400 uppercase tracking-wider">Unit Price</th>
+                                    <th class="py-3 text-right font-bold text-gray-400 uppercase tracking-wider">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-4 font-bold text-gray-950">${productName}</td>
+                                    <td class="py-4 text-center text-gray-700">${productQty}</td>
+                                    <td class="py-4 text-right text-gray-700">${productPrice}</td>
+                                    <td class="py-4 text-right font-black text-gray-950">${productPrice}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Summary -->
+                        <div class="flex justify-end pt-4">
+                            <div class="w-64 text-xs space-y-2">
+                                <div class="flex justify-between text-gray-500">
+                                    <span>Subtotal:</span>
+                                    <span>${productPrice}</span>
+                                </div>
+                                <div class="flex justify-between text-gray-500">
+                                    <span>Shipping:</span>
+                                    <span class="text-emerald-600 font-bold">FREE</span>
+                                </div>
+                                <div class="flex justify-between border-t border-gray-200 pt-2 font-black text-sm text-gray-900">
+                                    <span>Total Amount Paid:</span>
+                                    <span class="text-[#B88A44]">${productPrice}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="border-t border-gray-100 pt-8 mt-12 text-center text-[10px] text-gray-400">
+                            <p>Thank you for choosing ShopMe. We appreciate your fine taste.</p>
+                            <p class="mt-1">For support queries, please contact support@shopme.com</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+            invoiceWindow.document.close();
+            
             setTimeout(() => {
-                this.triggerToast('Invoice #' + orderNum + ' downloaded successfully.', 'success');
-            }, 1000);
+                invoiceWindow.print();
+            }, 500);
         },
         applyCoupon(code) {
             this.triggerToast('Applying coupon: ' + code + '...', 'info');
