@@ -179,9 +179,8 @@
 
     <x-new-arrivals :products="$latestProducts" />
 
-    {{-- 6. Limited Collection & Countdown Banner --}}
     <section 
-        class="rounded-[40px] overflow-hidden bg-gradient-to-br from-[#111827] to-[#1F2937] border border-gray-800 p-8 sm:p-12 md:p-16 lg:p-20 relative text-white grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
+        class="rounded-[40px] overflow-hidden bg-gradient-to-br from-[#FCFAF7] via-[#F4EFE6] to-[#EBE3D5] border border-[#B88A44]/15 p-8 sm:p-12 md:p-16 lg:p-20 relative text-[#111827] grid grid-cols-1 lg:grid-cols-12 gap-8 items-center shadow-2xl"
         x-data="{
             expiry: new Date().getTime() + (2 * 24 * 60 * 60 * 1000), // 2 Days from now
             days: '00', hours: '00', minutes: '00', seconds: '00',
@@ -196,57 +195,61 @@
         }"
         x-init="updateTimer(); setInterval(() => updateTimer(), 1000)"
     >
-        <div class="absolute -right-24 -top-24 w-80 h-80 rounded-full bg-[#B88A44]/5 blur-3xl"></div>
+        {{-- Glowing Ambient Bubbles --}}
+        <div class="absolute -top-16 -right-16 w-80 h-80 rounded-full bg-amber-400/20 blur-3xl pointer-events-none z-0 animate-[pulse_5s_infinite]"></div>
+        <div class="absolute -bottom-20 -left-20 w-96 h-96 rounded-full bg-[#B88A44]/15 blur-3xl pointer-events-none z-0 animate-[pulse_7s_infinite]"></div>
+        <div class="absolute top-1/4 left-1/3 w-64 h-64 rounded-full bg-rose-300/20 blur-2xl pointer-events-none z-0 animate-[pulse_6s_infinite]"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-48 h-48 rounded-full bg-amber-200/30 blur-2xl pointer-events-none z-0 animate-[pulse_8s_infinite]"></div>
         
         <div class="lg:col-span-7 space-y-6 relative z-10">
-            <span class="inline-flex items-center rounded-full bg-[#B88A44]/20 border border-[#B88A44]/30 px-3 py-1 text-[9px] font-bold text-[#B88A44] uppercase tracking-widest">
+            <span class="inline-flex items-center rounded-full bg-[#B88A44]/15 border border-[#B88A44]/30 px-3 py-1 text-[9px] font-bold text-[#B88A44] uppercase tracking-widest">
                 EXCLUSIVE DROPS
             </span>
-            <h2 class="font-serif text-3xl sm:text-5xl font-black leading-tight">
+            <h2 class="font-serif text-3xl sm:text-5xl font-black leading-tight text-gray-900">
                 Tuscan Leather Bag <br>
                 <span class="text-[#B88A44]">Limited Drop 2026</span>
             </h2>
-            <p class="text-sm text-gray-400 max-w-md leading-relaxed">
+            <p class="text-sm text-gray-500 max-w-md leading-relaxed">
                 Handcrafted in Tuscany. Stitched with gold silk fibers. Individually numbered edition. Only 50 units remaining globally.
             </p>
             
             {{-- Countdown Ticker --}}
-            <div class="flex items-center gap-4 pt-4">
-                <div class="text-center">
-                    <span class="block text-3xl sm:text-4xl font-serif font-black text-white" x-text="days">00</span>
-                    <span class="block text-[8px] font-bold uppercase tracking-wider text-gray-500 mt-1">Days</span>
+            <div class="flex items-center gap-2 sm:gap-4 pt-4">
+                <div class="text-center bg-white/60 backdrop-blur-md border border-[#B88A44]/10 rounded-2xl p-3 min-w-[70px] shadow-sm">
+                    <span class="block text-2xl sm:text-3xl font-mono font-bold text-gray-900 tracking-tight" x-text="days">00</span>
+                    <span class="block text-[8px] font-bold uppercase tracking-widest text-[#B88A44] mt-1">Days</span>
                 </div>
-                <span class="text-xl text-[#B88A44] font-bold pb-4">:</span>
-                <div class="text-center">
-                    <span class="block text-3xl sm:text-4xl font-serif font-black text-white" x-text="hours">00</span>
-                    <span class="block text-[8px] font-bold uppercase tracking-wider text-gray-500 mt-1">Hours</span>
+                <span class="text-lg text-gray-400 font-light">:</span>
+                <div class="text-center bg-white/60 backdrop-blur-md border border-[#B88A44]/10 rounded-2xl p-3 min-w-[70px] shadow-sm">
+                    <span class="block text-2xl sm:text-3xl font-mono font-bold text-gray-900 tracking-tight" x-text="hours">00</span>
+                    <span class="block text-[8px] font-bold uppercase tracking-widest text-[#B88A44] mt-1">Hours</span>
                 </div>
-                <span class="text-xl text-[#B88A44] font-bold pb-4">:</span>
-                <div class="text-center">
-                    <span class="block text-3xl sm:text-4xl font-serif font-black text-white" x-text="minutes">00</span>
-                    <span class="block text-[8px] font-bold uppercase tracking-wider text-gray-500 mt-1">Mins</span>
+                <span class="text-lg text-gray-400 font-light">:</span>
+                <div class="text-center bg-white/60 backdrop-blur-md border border-[#B88A44]/10 rounded-2xl p-3 min-w-[70px] shadow-sm">
+                    <span class="block text-2xl sm:text-3xl font-mono font-bold text-gray-900 tracking-tight" x-text="minutes">00</span>
+                    <span class="block text-[8px] font-bold uppercase tracking-widest text-[#B88A44] mt-1">Mins</span>
                 </div>
-                <span class="text-xl text-[#B88A44] font-bold pb-4">:</span>
-                <div class="text-center">
-                    <span class="block text-3xl sm:text-4xl font-serif font-black text-white" x-text="seconds">00</span>
-                    <span class="block text-[8px] font-bold uppercase tracking-wider text-gray-500 mt-1">Secs</span>
+                <span class="text-lg text-gray-400 font-light">:</span>
+                <div class="text-center bg-white/60 backdrop-blur-md border border-[#B88A44]/10 rounded-2xl p-3 min-w-[70px] shadow-sm">
+                    <span class="block text-2xl sm:text-3xl font-mono font-bold text-[#B88A44] tracking-tight animate-pulse" x-text="seconds">00</span>
+                    <span class="block text-[8px] font-bold uppercase tracking-widest text-gray-500 mt-1">Secs</span>
                 </div>
             </div>
         </div>
 
         <div class="lg:col-span-5 relative z-10 flex flex-col items-center lg:items-end justify-between h-full space-y-6 lg:space-y-0">
-            <div class="rounded-3xl border border-gray-800 bg-[#1F2937]/50 backdrop-blur-md p-6 max-w-sm flex items-center gap-4">
-                <div class="w-16 h-16 rounded-xl overflow-hidden border border-gray-700 shrink-0">
+            <div class="rounded-3xl border border-[#B88A44]/15 bg-white/60 backdrop-blur-md p-6 max-w-sm flex items-center gap-4 shadow-xl hover:-translate-y-1 transition-all duration-300">
+                <div class="w-16 h-16 rounded-xl overflow-hidden border border-[#B88A44]/10 shrink-0">
                     <img src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=200" class="w-full h-full object-cover" alt="">
                 </div>
                 <div class="space-y-1">
                     <span class="text-[9px] font-bold text-[#B88A44] uppercase tracking-wider"> Tuscan Heritage </span>
-                    <h4 class="text-xs font-bold text-white leading-normal truncate">Florence Heritage Duffel Bag</h4>
-                    <span class="text-xs font-bold text-gray-300">₹32,999.00</span>
+                    <h4 class="text-xs font-bold text-gray-900 leading-normal truncate">Florence Heritage Duffel Bag</h4>
+                    <span class="text-xs font-bold text-gray-700">₹32,999.00</span>
                 </div>
             </div>
             
-            <a href="/shop" class="group/limited inline-flex items-center justify-center gap-2.5 h-12 px-8 rounded-full text-xs font-bold tracking-wider uppercase text-[#111827] bg-white hover:bg-[#B88A44] hover:text-white transition-all duration-200 shadow-xl shadow-black/10">
+            <a href="/shop" class="group/limited inline-flex items-center justify-center gap-2.5 h-12 px-8 rounded-full text-xs font-bold tracking-wider uppercase text-white bg-[#111827] hover:bg-[#B88A44] transition-all duration-200 shadow-xl shadow-black/10">
                 <span>Reserve Drop</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right transition-transform duration-200 group-hover/limited:translate-x-1"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
             </a>

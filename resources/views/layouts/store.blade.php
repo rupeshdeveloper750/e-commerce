@@ -182,12 +182,22 @@
                     </button>
 
                     {{-- Wishlist --}}
+                    @php
+                        $wishlistCount = auth()->check() 
+                            ? \App\Models\Wishlist::where('user_id', auth()->id())->count() 
+                            : 0;
+                    @endphp
                     <a 
-                        href="{{ route('user.dashboard') }}" 
-                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/70 backdrop-blur-md border border-black/[0.05] flex items-center justify-center text-gray-700 hover:text-[#B88A44] hover:bg-[#FAF9F6] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-[220ms] relative"
+                        href="{{ route('user.dashboard', ['tab' => 'wishlist']) }}" 
+                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-[#B88A44] to-[#A77933] flex items-center justify-center text-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-[220ms] relative"
                         title="Wishlist"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="{{ $wishlistCount > 0 ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart text-white"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                        @if($wishlistCount > 0)
+                            <span class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-white text-[#B88A44] text-[10px] font-bold flex items-center justify-center border-2 border-[#B88A44] shadow-sm">
+                                {{ $wishlistCount }}
+                            </span>
+                        @endif
                     </a>
 
                     {{-- Cart Icon (live reactive badge) --}}

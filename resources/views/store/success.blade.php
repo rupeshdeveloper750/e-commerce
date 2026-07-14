@@ -10,21 +10,21 @@ if (!$src) return 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?
 if (str_starts_with($src, 'http')) return $src;
 $lower = strtolower($src);
 if (str_contains($lower, 'electronics') || str_contains($lower, 'phone') || str_contains($lower, 'tech'))
-    return 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400';
+return 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400';
 if (str_contains($lower, 'watch'))
-    return 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?q=80&w=400';
+return 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?q=80&w=400';
 if (str_contains($lower, 'shoe') || str_contains($lower, 'footwear') || str_contains($lower, 'sneaker'))
-    return 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=400';
+return 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=400';
 if (str_contains($lower, 'bag') || str_contains($lower, 'backpack') || str_contains($lower, 'satchel'))
-    return 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=400';
+return 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=400';
 if (str_contains($lower, 'iphone') || str_contains($lower, 'digital') || str_contains($lower, 'gold'))
-    return 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80';
+return 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80';
 return asset('storage/' . $src);
 }
 }
 @endphp
 
-<div class="flex items-center justify-center py-4 px-4" style="min-height: calc(100vh - 80px);">
+<div class="md:-mt-10 flex items-start justify-center pt-4 px-4 pb-4" style="min-height: calc(100vh - 70px);">
     <div class="w-full max-w-md">
 
         {{-- Main Card --}}
@@ -92,11 +92,11 @@ return asset('storage/' . $src);
                 {{-- Action buttons --}}
                 <div class="grid grid-cols-2 gap-2.5">
                     <a href="{{ route('store.shop') }}"
-                       class="inline-flex items-center justify-center rounded-xl border border-gray-200 text-[9.5px] font-bold uppercase tracking-[0.1em] text-gray-600 h-9 hover:bg-gray-50 hover:border-gray-300 transition-all duration-150 active:scale-[0.98]">
+                        class="inline-flex items-center justify-center rounded-xl border border-gray-200 text-[9.5px] font-bold uppercase tracking-[0.1em] text-gray-600 h-9 hover:bg-gray-50 hover:border-gray-300 transition-all duration-150 active:scale-[0.98]">
                         Continue Shopping
                     </a>
                     <a href="{{ route('user.dashboard') }}"
-                       class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#B88A44] hover:bg-[#a67c3b] text-white text-[9.5px] font-bold uppercase tracking-[0.1em] h-9 shadow-sm shadow-[#B88A44]/20 transition-all duration-150 active:scale-[0.98]">
+                        class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#B88A44] hover:bg-[#a67c3b] text-white text-[9.5px] font-bold uppercase tracking-[0.1em] h-9 shadow-sm shadow-[#B88A44]/20 transition-all duration-150 active:scale-[0.98]">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
                         </svg>

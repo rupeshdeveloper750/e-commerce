@@ -14,22 +14,24 @@
         </nav>
 
         {{-- Hero Section --}}
-        <div class="relative rounded-2xl overflow-hidden bg-stone-950 text-white p-8 md:p-14 flex flex-col justify-center min-h-[300px] shadow-xl relative">
-            {{-- Background decorative shapes --}}
-            <div class="absolute inset-0 opacity-15 mix-blend-overlay bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1200');"></div>
-            <div class="absolute inset-0 bg-gradient-to-r from-stone-950 via-stone-950/80 to-transparent"></div>
+        <div class="relative rounded-[32px] overflow-hidden bg-gradient-to-br from-[#FCFAF7] via-[#F4EFE6] to-[#EBE3D5] border border-[#B88A44]/15 text-[#111827] p-8 md:p-14 flex flex-col justify-center min-h-[300px] shadow-xl relative">
+            {{-- Glowing Ambient Bubbles --}}
+            <div class="absolute -top-16 -right-16 w-80 h-80 rounded-full bg-amber-400/20 blur-3xl pointer-events-none z-0 animate-[pulse_5s_infinite]"></div>
+            <div class="absolute -bottom-20 -left-20 w-96 h-96 rounded-full bg-[#B88A44]/15 blur-3xl pointer-events-none z-0 animate-[pulse_7s_infinite]"></div>
+            <div class="absolute top-1/4 left-1/3 w-64 h-64 rounded-full bg-rose-300/20 blur-2xl pointer-events-none z-0 animate-[pulse_6s_infinite]"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-48 h-48 rounded-full bg-amber-200/30 blur-2xl pointer-events-none z-0 animate-[pulse_8s_infinite]"></div>
 
             <div class="relative z-10 max-w-xl space-y-4">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-[#B88A44] bg-[#B88A44]/10 border border-[#B88A44]/25 px-3 py-1 rounded-full w-fit block">Limited Time Offers</span>
-                <h1 class="font-serif text-3xl md:text-5xl font-bold tracking-tight leading-tight">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-[#B88A44] bg-[#B88A44]/10 border border-[#B88A44]/25 px-3 py-1 rounded-full w-fit block font-semibold">Limited Time Offers</span>
+                <h1 class="font-serif text-3xl md:text-5xl font-bold tracking-tight leading-tight text-gray-900">
                     Season End Luxury Deals
                 </h1>
-                <p class="text-xs md:text-sm text-stone-300 leading-relaxed font-medium">
+                <p class="text-xs md:text-sm text-gray-500 leading-relaxed font-medium">
                     Handcrafted premium bags, canvas backpacks, and leather sleeves. Save up to 40% on timeless essentials. No coupon required.
                 </p>
 
                 {{-- Live Countdown Timer --}}
-                <div class="pt-2 flex items-center gap-4" x-data="{
+                <div class="pt-2 flex items-center gap-2 sm:gap-4" x-data="{
                     days: 0, hours: 0, minutes: 0, seconds: 0,
                     init() {
                         const target = new Date();
@@ -44,24 +46,24 @@
                         }, 1000);
                     }
                 }">
-                    <div class="flex flex-col items-center">
-                        <span class="font-serif text-xl md:text-2xl font-bold text-[#B88A44]" x-text="String(days).padStart(2, '0')">00</span>
-                        <span class="text-[8px] uppercase tracking-widest text-stone-400 font-bold">Days</span>
+                    <div class="text-center bg-white/60 backdrop-blur-md border border-[#B88A44]/10 rounded-2xl p-3 min-w-[70px] shadow-sm">
+                        <span class="block text-xl md:text-2xl font-mono font-bold text-gray-900 tracking-tight" x-text="String(days).padStart(2, '0')">00</span>
+                        <span class="block text-[8px] font-bold uppercase tracking-widest text-[#B88A44] mt-1">Days</span>
                     </div>
-                    <span class="text-stone-600 font-bold text-lg -mt-4">:</span>
-                    <div class="flex flex-col items-center">
-                        <span class="font-serif text-xl md:text-2xl font-bold text-[#B88A44]" x-text="String(hours).padStart(2, '0')">00</span>
-                        <span class="text-[8px] uppercase tracking-widest text-stone-400 font-bold">Hrs</span>
+                    <span class="text-lg text-gray-400 font-light">:</span>
+                    <div class="text-center bg-white/60 backdrop-blur-md border border-[#B88A44]/10 rounded-2xl p-3 min-w-[70px] shadow-sm">
+                        <span class="block text-xl md:text-2xl font-mono font-bold text-gray-900 tracking-tight" x-text="String(hours).padStart(2, '0')">00</span>
+                        <span class="block text-[8px] font-bold uppercase tracking-widest text-[#B88A44] mt-1">Hours</span>
                     </div>
-                    <span class="text-stone-600 font-bold text-lg -mt-4">:</span>
-                    <div class="flex flex-col items-center">
-                        <span class="font-serif text-xl md:text-2xl font-bold text-[#B88A44]" x-text="String(minutes).padStart(2, '0')">00</span>
-                        <span class="text-[8px] uppercase tracking-widest text-stone-400 font-bold">Mins</span>
+                    <span class="text-lg text-gray-400 font-light">:</span>
+                    <div class="text-center bg-white/60 backdrop-blur-md border border-[#B88A44]/10 rounded-2xl p-3 min-w-[70px] shadow-sm">
+                        <span class="block text-xl md:text-2xl font-mono font-bold text-gray-900 tracking-tight" x-text="String(minutes).padStart(2, '0')">00</span>
+                        <span class="block text-[8px] font-bold uppercase tracking-widest text-[#B88A44] mt-1">Mins</span>
                     </div>
-                    <span class="text-stone-600 font-bold text-lg -mt-4">:</span>
-                    <div class="flex flex-col items-center">
-                        <span class="font-serif text-xl md:text-2xl font-bold text-red-500" x-text="String(seconds).padStart(2, '0')">00</span>
-                        <span class="text-[8px] uppercase tracking-widest text-stone-400 font-bold">Secs</span>
+                    <span class="text-lg text-gray-400 font-light">:</span>
+                    <div class="text-center bg-white/60 backdrop-blur-md border border-[#B88A44]/10 rounded-2xl p-3 min-w-[70px] shadow-sm">
+                        <span class="block text-xl md:text-2xl font-mono font-bold text-[#B88A44] tracking-tight animate-pulse" x-text="String(seconds).padStart(2, '0')">00</span>
+                        <span class="block text-[8px] font-bold uppercase tracking-widest text-gray-500 mt-1">Secs</span>
                     </div>
                 </div>
             </div>

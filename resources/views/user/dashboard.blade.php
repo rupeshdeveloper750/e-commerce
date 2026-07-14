@@ -11,7 +11,7 @@
     class="max-w-[1440px] mx-auto min-h-screen pb-12"
     x-data="{ 
         // Tabs state
-        activeTab: 'dashboard',
+        activeTab: '{{ request()->query("tab", "dashboard") }}',
         drawerOpen: false,
         tabLoading: false,
         changeTab(tabId) {
@@ -477,202 +477,6 @@
                                 type="orders"
                             />
                         @endforelse
-                    </div>
-                </div>
-
-                {{-- SECTION 3: RECOMMENDED FOR YOU --}}
-                <div class="space-y-6 relative group/carousel">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h2 class="font-serif font-bold text-xl text-gray-900 tracking-tight">Recommended For You</h2>
-                            <p class="text-[11px] text-gray-400 font-semibold uppercase tracking-widest mt-0.5">Curated matches for your styling preference</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button 
-                                @click="$refs.recommendedCarousel.scrollBy({ left: -280, behavior: 'smooth' })" 
-                                class="w-12 h-12 rounded-full bg-white hover:bg-brand-50 border border-gray-150 flex items-center justify-center text-gray-500 hover:text-brand-500 transition-colors shadow-sm focus:outline-none"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                            </button>
-                            <button 
-                                @click="$refs.recommendedCarousel.scrollBy({ left: 280, behavior: 'smooth' })" 
-                                class="w-12 h-12 rounded-full bg-white hover:bg-brand-50 border border-gray-150 flex items-center justify-center text-gray-500 hover:text-brand-500 transition-colors shadow-sm focus:outline-none"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div 
-                        x-ref="recommendedCarousel" 
-                        class="flex gap-4 lg:gap-6 overflow-x-auto no-scrollbar pb-4 pt-1 snap-x scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0"
-                    >
-                        @forelse($recommendedProducts as $product)
-                            @php
-                                $isOnSale = !empty($product->sale_price);
-                                $displayPrice = $isOnSale ? $product->sale_price : $product->price;
-                                $discountPct = $isOnSale ? round((($product->price - $product->sale_price) / $product->price) * 100) : 0;
-                                
-                                $productData = json_encode([
-                                    'name' => $product->name,
-                                    'brand' => $product->brand ? $product->brand->name : 'ShopMe Exclusive',
-                                    'price' => number_format($displayPrice, 2),
-                                    'original_price' => $isOnSale ? number_format($product->price, 2) : null,
-                                    'description' => $product->short_description ?? $product->description ?? 'No description available.',
-                                    'featured_image' => $product->featuredImage ? ['image_path' => $product->featuredImage->image_path] : null,
-                                    'slug' => $product->slug,
-                                    'id' => $product->id,
-                                    'quantity' => $product->quantity ?? 0,
-                                    'sku' => $product->sku ?? 'N/A'
-                                ]);
-                            @endphp
-                            <div class="w-[250px] xs:w-[280px] sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3rem)/3)] shrink-0 snap-start">
-                                <div class="group bg-white rounded-[24px] border border-gray-150 overflow-hidden hover:border-brand-300 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-[320px] md:h-[360px]">
-                                    <div class="aspect-square bg-gray-50 overflow-hidden relative group/img">
-                                        @if($product->featuredImage)
-                                            <img src="{{ asset('storage/' . $product->featuredImage->image_path) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="">
-                                        @else
-                                            <div class="w-full h-full flex items-center justify-center text-xs font-bold text-gray-400 bg-gray-50">No Image</div>
-                                        @endif
-
-                                        @if($isOnSale)
-                                            <span class="absolute top-4 left-4 inline-flex items-center rounded-full bg-red-50 border border-red-150 px-2.5 py-0.5 text-[9px] font-bold text-red-650 tracking-wider">
-                                                -{{ $discountPct }}% OFF
-                                            </span>
-                                        @endif
-
-                                        <form action="{{ route('user.wishlist.add', $product->id) }}" method="POST" class="absolute top-4 right-4 z-10">
-                                            @csrf
-                                            <button type="submit" class="w-8 h-8 rounded-full bg-white/95 backdrop-blur shadow hover:bg-brand-50 hover:text-brand-500 text-gray-400 flex items-center justify-center transition-all duration-200" title="Add to Collection">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                                </svg>
-                                            </button>
-                                        </form>
-                                    </div>
-                                    
-                                    <div class="p-4 space-y-1.5 flex-grow">
-                                        <div class="flex items-center gap-1">
-                                            <div class="flex items-center text-amber-400">
-                                                @for($i = 0; $i < 5; $i++)
-                                                    <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                                    </svg>
-                                                @endfor
-                                            </div>
-                                            <span class="text-[9px] text-gray-400 font-bold">(4.8)</span>
-                                        </div>
-
-                                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">
-                                            {{ $product->brand ? $product->brand->name : 'ShopMe Exclusive' }}
-                                        </span>
-                                        
-                                        <h4 class="font-serif font-bold text-sm text-gray-900 truncate">
-                                            <a href="{{ route('store.product.show', $product->slug) }}" class="hover:text-brand-500 transition-colors">{{ $product->name }}</a>
-                                        </h4>
-                                        
-                                        <div class="flex items-baseline gap-2">
-                                            <span class="font-serif font-black text-sm text-gray-900">₹{{ number_format($displayPrice, 2) }}</span>
-                                            @if($isOnSale)
-                                                <span class="text-xs text-gray-400 line-through font-medium">₹{{ number_format($product->price, 2) }}</span>
-                                            @endif
-                                        </div>
-                                    </div>
-
-                                    <div class="p-4 pt-0 flex gap-2">
-                                        <form action="{{ route('store.cart.add', $product->id) }}" method="POST" class="flex-grow">
-                                            @csrf
-                                            <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 bg-brand-500 text-white rounded-xl py-2 text-xs font-bold hover:bg-brand-600 transition shadow-sm" title="Add to Bag">
-                                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                                                <span class="hidden sm:inline">Add to Bag</span>
-                                            </button>
-                                        </form>
-                                        <button 
-                                            @click="openQuickView({{ $productData }})" 
-                                            class="p-2 bg-gray-50 border border-gray-150 hover:bg-gray-100 text-gray-500 rounded-xl transition focus:outline-none"
-                                            title="Quick View"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="p-6 text-center text-gray-400 w-full italic">No recommendations available.</div>
-                        @endforelse
-                    </div>
-                </div>
-
-                {{-- SECTION 4: RECENTLY VIEWED --}}
-                <div class="space-y-6 pt-2">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h2 class="font-serif font-bold text-xl text-gray-900 tracking-tight flex items-center gap-2">
-                                <span>Recently Viewed</span>
-                                <span class="inline-flex items-center rounded-full bg-brand-50 border border-brand-100 px-2.5 py-0.5 text-[8px] font-bold text-brand-700 uppercase tracking-widest leading-none">History</span>
-                            </h2>
-                            <p class="text-[11px] text-gray-400 font-semibold uppercase tracking-widest mt-0.5">Pick up where you left off</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button 
-                                @click="$refs.recentlyViewedCarousel.scrollBy({ left: -280, behavior: 'smooth' })" 
-                                class="w-12 h-12 rounded-full bg-white hover:bg-brand-50 border border-gray-150 flex items-center justify-center text-gray-500 hover:text-brand-500 transition-colors shadow-sm focus:outline-none"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                            </button>
-                            <button 
-                                @click="$refs.recentlyViewedCarousel.scrollBy({ left: 280, behavior: 'smooth' })" 
-                                class="w-12 h-12 rounded-full bg-white hover:bg-brand-50 border border-gray-150 flex items-center justify-center text-gray-500 hover:text-brand-500 transition-colors shadow-sm focus:outline-none"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="relative">
-                        <div x-ref="recentlyViewedCarousel" class="flex gap-4 lg:gap-6 overflow-x-auto no-scrollbar pb-4 pt-1 snap-x scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
-                            @forelse($recentlyViewed as $product)
-                                <div class="w-[250px] xs:w-[280px] sm:w-[calc((100%-1.5rem)/2)] lg:w-[calc((100%-3rem)/3)] shrink-0 snap-start">
-                                    <div class="group bg-white rounded-[24px] border border-gray-150 overflow-hidden hover:border-brand-300 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between h-[300px] md:h-[340px]">
-                                        <div class="aspect-square bg-gray-50 overflow-hidden relative">
-                                            @if($product->featuredImage)
-                                                <img src="{{ asset('storage/' . $product->featuredImage->image_path) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-550" alt="">
-                                            @else
-                                                <div class="w-full h-full flex items-center justify-center text-xs font-bold text-gray-400 bg-gray-50">No Image</div>
-                                            @endif
-                                            
-                                            <a href="{{ route('store.product.show', $product->slug) }}" class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition duration-300"></a>
-                                            <span class="absolute top-4 left-4 inline-flex items-center rounded-full bg-gray-900/90 text-white border border-white/10 px-2.5 py-0.5 text-[8px] font-bold uppercase tracking-wider">Recently Viewed</span>
-                                        </div>
-                                        <div class="p-4 space-y-1.5">
-                                            <h4 class="font-serif font-bold text-sm text-gray-900 truncate">
-                                                <a href="{{ route('store.product.show', $product->slug) }}" class="hover:text-brand-500 transition-colors">{{ $product->name }}</a>
-                                            </h4>
-                                            <p class="text-xs font-black text-gray-900">₹{{ number_format($product->price, 2) }}</p>
-                                        </div>
-                                        <div class="p-4 pt-0">
-                                            <form action="{{ route('store.cart.add', $product->id) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 bg-brand-500 text-white rounded-xl py-2 text-xs font-bold hover:bg-brand-600 transition shadow-sm" title="Add to Bag">
-                                                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                                                    <span class="hidden sm:inline">Add to Bag</span>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            @empty
-                                <x-empty-state 
-                                    title="No Recently Viewed Items" 
-                                    message="Your browsing path will show up here. Discover new arrivals now." 
-                                    actionText="Explore Shop"
-                                    actionRoute="store.shop"
-                                />
-                            @endforelse
-                        </div>
                     </div>
                 </div>
 
@@ -2293,123 +2097,163 @@
 
 </div>
 
-<!-- BOTTOM SHEETS BACKDROP OVERLAY FOR MOBILE SIDEBAR DRAWER -->
+<!-- BACKDROP -->
 <div 
     x-show="drawerOpen" 
-    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter="transition ease-out duration-250"
     x-transition:enter-start="opacity-0"
     x-transition:enter-end="opacity-100"
-    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave="transition ease-in duration-180"
     x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0"
     @click="drawerOpen = false" 
-    class="fixed inset-0 z-40 bg-gray-950/80 backdrop-blur-none lg:hidden"
+    class="fixed inset-0 z-40 bg-gray-950/60 backdrop-blur-sm lg:hidden"
     x-cloak
 ></div>
 
-<!-- SLIDE-UP PORTAL MENU DRAWER FOR MOBILE -->
+<!-- SLIDE-UP DRAWER -->
 <div 
     x-show="drawerOpen" 
     x-transition:enter="transition ease-out duration-300 transform"
     x-transition:enter-start="translate-y-full"
     x-transition:enter-end="translate-y-0"
-    x-transition:leave="transition ease-in duration-200 transform"
+    x-transition:leave="transition ease-in duration-220 transform"
     x-transition:leave-start="translate-y-0"
     x-transition:leave-end="translate-y-full"
-    class="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-[32px] border-t border-gray-150 p-6 space-y-6 shadow-2xl pb-safe lg:hidden max-h-[85vh] overflow-y-auto"
+    class="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-[28px] shadow-2xl lg:hidden overflow-hidden"
+    style="max-height: 82vh;"
     x-cloak
 >
-    <!-- Drag Handle -->
-    <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto -mt-2"></div>
-    
-    <!-- User Profile Header -->
-    <div class="flex items-center gap-4 bg-gray-50 border border-gray-100 rounded-2xl p-4">
-        <div class="w-12 h-12 rounded-xl bg-[#B88A44] border border-brand-100 overflow-hidden flex items-center justify-center text-white font-serif font-black text-xl shadow-md">
-            {{ substr($user->name, 0, 1) }}
-        </div>
-        <div class="min-w-0">
-            <div class="flex items-center gap-1.5">
-                <h4 class="font-serif font-black text-base text-gray-900 leading-none">{{ $user->name }}</h4>
-                <span class="inline-flex items-center rounded-full bg-brand-500/10 border border-brand-500/20 px-2 py-0.5 text-[8px] font-bold text-brand-700 uppercase tracking-widest leading-none">VIP GOLD</span>
-            </div>
-            <p class="text-xs text-gray-400 font-semibold truncate leading-normal pt-1">{{ $user->email }}</p>
-        </div>
-    </div>
+    {{-- Scrollable inner --}}
+    <div class="overflow-y-auto" style="max-height: 82vh;">
 
-    <!-- Portal Navigation -->
-    <nav class="space-y-1">
-        @foreach([
-            ['id' => 'dashboard', 'name' => 'Dashboard Overview', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />'],
-            ['id' => 'orders', 'name' => 'My Purchase History', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />'],
-            ['id' => 'wishlist', 'name' => 'Saved Collection', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />'],
-            ['id' => 'addresses', 'name' => 'Saved Addresses', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />'],
-            ['id' => 'cards', 'name' => 'Payment Cards', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />'],
-            ['id' => 'coupons', 'name' => 'Available Coupons', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />'],
-            ['id' => 'rewards', 'name' => 'Rewards Wallet', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'],
-            ['id' => 'reviews', 'name' => 'Product Feedback', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />'],
-            ['id' => 'notifications', 'name' => 'Notification Center', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />'],
-            ['id' => 'help', 'name' => 'Support Concierge', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />'],
-            ['id' => 'settings', 'name' => 'Account Settings', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />']
-        ] as $item)
-            <button 
-                @click="changeTab('{{ $item['id'] }}')"
-                :class="activeTab === '{{ $item['id'] }}' 
-                    ? 'bg-brand-50 text-brand-500 font-bold border-l-2 border-brand-500 pl-3.5' 
-                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 border-l-2 border-transparent pl-4'"
-                class="w-full flex items-center justify-between h-12 rounded-r-xl transition-all duration-200 group text-left focus:outline-none"
-            >
-                <div class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-gray-400 group-hover:text-brand-500 transition-colors" :class="activeTab === '{{ $item['id'] }}' ? 'text-brand-500' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        {!! $item['icon'] !!}
-                    </svg>
-                    <span class="text-[10px] font-bold uppercase tracking-widest leading-none">{{ $item['name'] }}</span>
+        {{-- Drag handle --}}
+        <div class="flex justify-center pt-3 pb-1">
+            <div class="w-10 h-1 bg-gray-200 rounded-full"></div>
+        </div>
+
+        {{-- Profile Header --}}
+        <div class="px-5 pt-2 pb-4">
+            <div class="flex items-center gap-3.5 bg-gradient-to-r from-[#FBF8F3] to-[#F6ECD9] border border-[#F0E0C0] rounded-2xl p-3.5">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-[#B88A44] to-[#8E6226] flex items-center justify-center text-white font-serif font-black text-lg shadow-md shrink-0">
+                    {{ substr($user->name, 0, 1) }}
                 </div>
-                <svg class="w-3.5 h-3.5 text-gray-300 group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-            </button>
-        @endforeach
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-serif font-black text-sm text-gray-900 leading-none truncate">{{ $user->name }}</span>
+                        <span class="inline-flex items-center rounded-full bg-[#B88A44]/15 border border-[#B88A44]/30 px-1.5 py-0.5 text-[7.5px] font-bold text-[#8E6226] uppercase tracking-widest leading-none shrink-0">VIP</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400 font-medium truncate mt-0.5">{{ $user->email }}</p>
+                </div>
+                <button @click="drawerOpen = false" class="w-8 h-8 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition shrink-0 shadow-sm">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </div>
 
-        <div class="h-px bg-gray-100 my-3"></div>
+        {{-- Nav Section Label --}}
+        <div class="px-5 pb-1">
+            <span class="text-[8.5px] font-bold uppercase tracking-[0.18em] text-gray-400">My Account</span>
+        </div>
 
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="w-full flex items-center gap-3 px-4 h-12 rounded-xl text-red-500 hover:bg-red-50 transition focus:outline-none">
-                <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                <span class="text-[10px] font-bold uppercase tracking-widest">Logout</span>
-            </button>
-        </form>
-    </nav>
+        {{-- Navigation Items --}}
+        <nav class="px-3 pb-2 space-y-0.5">
+            @foreach([
+                ['id' => 'dashboard', 'name' => 'Dashboard', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />'],
+                ['id' => 'orders', 'name' => 'My Orders', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />'],
+                ['id' => 'wishlist', 'name' => 'Wishlist', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />'],
+                ['id' => 'addresses', 'name' => 'Addresses', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />'],
+                ['id' => 'cards', 'name' => 'Payment Cards', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />'],
+                ['id' => 'coupons', 'name' => 'Coupons', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />'],
+                ['id' => 'rewards', 'name' => 'Rewards', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'],
+                ['id' => 'reviews', 'name' => 'Reviews', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />'],
+                ['id' => 'notifications', 'name' => 'Notifications', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />'],
+                ['id' => 'help', 'name' => 'Support', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />'],
+                ['id' => 'settings', 'name' => 'Settings', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />']
+            ] as $item)
+                <button 
+                    @click="changeTab('{{ $item['id'] }}')"
+                    :class="activeTab === '{{ $item['id'] }}' ? 'bg-[#B88A44]/8 text-[#B88A44]' : 'text-gray-600 hover:bg-gray-50'"
+                    class="w-full flex items-center gap-3 px-3 h-11 rounded-xl transition-all duration-150 text-left focus:outline-none"
+                >
+                    <div :class="activeTab === '{{ $item['id'] }}' ? 'bg-[#B88A44]/15' : 'bg-gray-100'" class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors duration-150">
+                        <svg class="w-4 h-4 transition-colors" :class="activeTab === '{{ $item['id'] }}' ? 'text-[#B88A44]' : 'text-gray-400'" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            {!! $item['icon'] !!}
+                        </svg>
+                    </div>
+                    <span class="text-[11px] font-semibold leading-none">{{ $item['name'] }}</span>
+                    <svg class="w-3.5 h-3.5 text-gray-300 ml-auto" :class="activeTab === '{{ $item['id'] }}' ? 'text-[#B88A44]/50' : ''" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            @endforeach
+        </nav>
+
+        {{-- Divider + Logout --}}
+        <div class="mx-5 mb-3 mt-1">
+            <div class="h-px bg-gray-100 mb-2"></div>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="w-full flex items-center gap-3 px-3 h-11 rounded-xl text-red-500 hover:bg-red-50 transition focus:outline-none">
+                    <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                    </div>
+                    <span class="text-[11px] font-semibold">Sign Out</span>
+                </button>
+            </form>
+        </div>
+
+        {{-- Safe area bottom spacer --}}
+        <div class="h-6"></div>
+    </div>
 </div>
 
-<!-- BOTTOM SHEET NAVIGATION BAR FOR MOBILE (Shopify/Zara inspired app flow) -->
-<div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-150 py-2 px-4 flex items-center justify-around shadow-lg pb-safe">
-    <button @click="changeTab('dashboard')" class="flex flex-col items-center justify-center w-14 h-12 gap-0.5 focus:outline-none relative group/btn" :class="activeTab === 'dashboard' ? 'text-brand-500' : 'text-gray-400'">
-        <svg class="w-5 h-5 transition-transform duration-200 group-active/btn:scale-95" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" /></svg>
-        <span class="text-[9px] font-bold uppercase tracking-widest leading-none">Home</span>
-        <span x-show="activeTab === 'dashboard'" class="absolute -bottom-1 w-1 h-1 rounded-full bg-brand-500"></span>
-    </button>
-    <button @click="changeTab('orders')" class="flex flex-col items-center justify-center w-14 h-12 gap-0.5 focus:outline-none relative group/btn" :class="activeTab === 'orders' ? 'text-brand-500' : 'text-gray-400'">
-        <svg class="w-5 h-5 transition-transform duration-200 group-active/btn:scale-95" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-        <span class="text-[9px] font-bold uppercase tracking-widest leading-none">Orders</span>
-        <span x-show="activeTab === 'orders'" class="absolute -bottom-1 w-1 h-1 rounded-full bg-brand-500"></span>
-    </button>
-    <button @click="changeTab('wishlist')" class="flex flex-col items-center justify-center w-14 h-12 gap-0.5 focus:outline-none relative group/btn" :class="activeTab === 'wishlist' ? 'text-brand-500' : 'text-gray-400'">
-        <svg class="w-5 h-5 transition-transform duration-200 group-active/btn:scale-95" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-        <span class="text-[9px] font-bold uppercase tracking-widest leading-none">Wishlist</span>
-        <span x-show="activeTab === 'wishlist'" class="absolute -bottom-1 w-1 h-1 rounded-full bg-brand-500"></span>
-    </button>
-    <button @click="changeTab('notifications')" class="flex flex-col items-center justify-center w-14 h-12 gap-0.5 focus:outline-none relative group/btn" :class="activeTab === 'notifications' ? 'text-brand-500' : 'text-gray-400'">
-        <svg class="w-5 h-5 transition-transform duration-200 group-active/btn:scale-95" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-        <span class="text-[9px] font-bold uppercase tracking-widest leading-none">Notifs</span>
-        <span x-show="activeTab === 'notifications'" class="absolute -bottom-1 w-1 h-1 rounded-full bg-brand-500"></span>
-    </button>
-    <button @click="drawerOpen = !drawerOpen" class="flex flex-col items-center justify-center w-14 h-12 gap-0.5 focus:outline-none relative group/btn" :class="drawerOpen ? 'text-brand-500' : 'text-gray-400'">
-        <svg class="w-5 h-5 transition-transform duration-200 group-active/btn:scale-95" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-        <span class="text-[9px] font-bold uppercase tracking-widest leading-none">Profile</span>
-        <span x-show="drawerOpen" class="absolute -bottom-1 w-1 h-1 rounded-full bg-brand-500"></span>
-    </button>
+<!-- BOTTOM NAV BAR (Mobile) -->
+<div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-100 shadow-[0_-4px_24px_rgba(0,0,0,0.06)]" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
+    <div class="flex items-center justify-around px-2 py-1.5">
+
+        {{-- Home --}}
+        <button @click="changeTab('dashboard')" class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1.5 px-2 rounded-xl transition-all duration-200 focus:outline-none" :class="activeTab === 'dashboard' ? 'text-[#B88A44]' : 'text-gray-400'">
+            <div :class="activeTab === 'dashboard' ? 'bg-[#B88A44]/12 scale-110' : ''" class="w-9 h-7 rounded-lg flex items-center justify-center transition-all duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" /></svg>
+            </div>
+            <span class="text-[8.5px] font-bold leading-none" :class="activeTab === 'dashboard' ? 'text-[#B88A44]' : 'text-gray-400'">Home</span>
+        </button>
+
+        {{-- Orders --}}
+        <button @click="changeTab('orders')" class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1.5 px-2 rounded-xl transition-all duration-200 focus:outline-none" :class="activeTab === 'orders' ? 'text-[#B88A44]' : 'text-gray-400'">
+            <div :class="activeTab === 'orders' ? 'bg-[#B88A44]/12 scale-110' : ''" class="w-9 h-7 rounded-lg flex items-center justify-center transition-all duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+            </div>
+            <span class="text-[8.5px] font-bold leading-none" :class="activeTab === 'orders' ? 'text-[#B88A44]' : 'text-gray-400'">Orders</span>
+        </button>
+
+        {{-- Wishlist --}}
+        <button @click="changeTab('wishlist')" class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1.5 px-2 rounded-xl transition-all duration-200 focus:outline-none" :class="activeTab === 'wishlist' ? 'text-[#B88A44]' : 'text-gray-400'">
+            <div :class="activeTab === 'wishlist' ? 'bg-[#B88A44]/12 scale-110' : ''" class="w-9 h-7 rounded-lg flex items-center justify-center transition-all duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+            </div>
+            <span class="text-[8.5px] font-bold leading-none" :class="activeTab === 'wishlist' ? 'text-[#B88A44]' : 'text-gray-400'">Wishlist</span>
+        </button>
+
+        {{-- Notifications --}}
+        <button @click="changeTab('notifications')" class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1.5 px-2 rounded-xl transition-all duration-200 focus:outline-none" :class="activeTab === 'notifications' ? 'text-[#B88A44]' : 'text-gray-400'">
+            <div :class="activeTab === 'notifications' ? 'bg-[#B88A44]/12 scale-110' : ''" class="w-9 h-7 rounded-lg flex items-center justify-center transition-all duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+            </div>
+            <span class="text-[8.5px] font-bold leading-none" :class="activeTab === 'notifications' ? 'text-[#B88A44]' : 'text-gray-400'">Alerts</span>
+        </button>
+
+        {{-- More (Profile Drawer) --}}
+        <button @click="drawerOpen = !drawerOpen" class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1.5 px-2 rounded-xl transition-all duration-200 focus:outline-none" :class="drawerOpen ? 'text-[#B88A44]' : 'text-gray-400'">
+            <div :class="drawerOpen ? 'bg-[#B88A44]/12 scale-110' : ''" class="w-9 h-7 rounded-lg flex items-center justify-center transition-all duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+            </div>
+            <span class="text-[8.5px] font-bold leading-none" :class="drawerOpen ? 'text-[#B88A44]' : 'text-gray-400'">More</span>
+        </button>
+
+    </div>
 </div>
 @endsection

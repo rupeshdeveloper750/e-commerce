@@ -17,7 +17,7 @@ class HomeController extends Controller
         $featuredCategories = Category::where('status', true)->whereNull('parent_id')->orderBy('sort_order')->take(6)->get();
         $featuredProducts = Product::with('featuredImage')
             ->where('status', true)
-            ->where('is_bestseller', true)
+            ->where('is_featured', true)
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
             ->orderByRaw('bestseller_sort_order IS NULL, bestseller_sort_order ASC')
