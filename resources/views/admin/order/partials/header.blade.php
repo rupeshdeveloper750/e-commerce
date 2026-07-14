@@ -28,6 +28,7 @@
         {{-- Export CSV --}}
         <a
             href="{{ route('admin.orders.export') }}"
+            hx-boost="false"
             class="inline-flex h-12 items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-5 text-sm font-semibold text-slate-300 transition hover:bg-slate-700"
         >
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

@@ -9,336 +9,8 @@
 
 <div 
     class="max-w-[1440px] mx-auto min-h-screen pb-12"
-    x-data="{ 
-        // Tabs state
-        activeTab: '{{ request()->query("tab", "dashboard") }}',
-        drawerOpen: false,
-        tabLoading: false,
-        changeTab(tabId) {
-            if (this.activeTab === tabId) return;
-            this.tabLoading = true;
-            this.activeTab = tabId;
-            this.drawerOpen = false;
-            setTimeout(() => { this.tabLoading = false; }, 300);
-        },
-        
-        // Modal / Notification UI feedback
-        toastMessage: '',
-        toastType: 'info',
-        showToast: false,
-        triggerToast(msg, type = 'info') {
-            this.toastMessage = msg;
-            this.toastType = type;
-            this.showToast = true;
-            setTimeout(() => { this.showToast = false; }, 3000);
-        },
-
-        // Mocked Address State
-        addresses: [
-            { label: 'Home', name: '{{ $user->name }}', street: '124, Luxury Boulevard, Bandra West', city: 'Mumbai', state: 'Maharashtra', zip: '400050', phone: '9876543210', is_default: true },
-            { label: 'Office', name: '{{ $user->name }}', street: 'Level 14, Capital Tower, Outer Ring Road', city: 'Bangalore', state: 'Karnataka', zip: '560103', phone: '9876543211', is_default: false }
-        ],
-        showAddressModal: false,
-        addressForm: { index: -1, label: 'Home', name: '', street: '', city: '', state: '', zip: '', phone: '', is_default: false },
-        
-        addAddressOpen() {
-            this.addressForm = { index: -1, label: 'Home', name: '{{ $user->name }}', street: '', city: '', state: '', zip: '', phone: '', is_default: false };
-            this.showAddressModal = true;
-        },
-        editAddress(index) {
-            const addr = this.addresses[index];
-            this.addressForm = { index: index, ...addr };
-            this.showAddressModal = true;
-        },
-        saveAddress() {
-            if (!this.addressForm.name || !this.addressForm.street || !this.addressForm.city) {
-                this.triggerToast('Please fill out all required fields.', 'error');
-                return;
-            }
-            if (this.addressForm.is_default) {
-                this.addresses.forEach(a => a.is_default = false);
-            }
-            if (this.addressForm.index === -1) {
-                // Add new
-                this.addresses.push({ ...this.addressForm });
-                this.triggerToast('New address saved successfully.', 'success');
-            } else {
-                // Update existing
-                this.addresses[this.addressForm.index] = { ...this.addressForm };
-                this.triggerToast('Address updated successfully.', 'success');
-            }
-            this.showAddressModal = false;
-        },
-        deleteAddress(index) {
-            if(confirm('Are you sure you want to delete this address?')) {
-                this.addresses.splice(index, 1);
-                this.triggerToast('Address deleted successfully.', 'success');
-            }
-        },
-
-        // Mocked Cards State
-        cards: [
-            { id: 1, brand: 'visa', number: '•••• •••• •••• 4242', expiry: '12/28', holder: '{{ strtoupper($user->name) }}', is_default: true },
-            { id: 2, brand: 'mastercard', number: '•••• •••• •••• 8855', expiry: '09/27', holder: '{{ strtoupper($user->name) }}', is_default: false }
-        ],
-        showCardModal: false,
-        cardForm: { brand: 'visa', number: '', expiry: '', holder: '', is_default: false },
-        
-        saveCard() {
-            if(!this.cardForm.number || !this.cardForm.expiry || !this.cardForm.holder) {
-                this.triggerToast('Please complete the card details.', 'error');
-                return;
-            }
-            if (this.cardForm.is_default) {
-                this.cards.forEach(c => c.is_default = false);
-            }
-            // Format card number to mask
-            let masked = '•••• •••• •••• ' + this.cardForm.number.slice(-4);
-            this.cards.push({
-                id: Date.now(),
-                brand: this.cardForm.brand,
-                number: masked,
-                expiry: this.cardForm.expiry,
-                holder: this.cardForm.holder.toUpperCase(),
-                is_default: this.cardForm.is_default
-            });
-            this.showCardModal = false;
-            this.triggerToast('Saved card successfully.', 'success');
-        },
-        deleteCard(id) {
-            if (confirm('Delete this payment method?')) {
-                this.cards = this.cards.filter(c => c.id !== id);
-                this.triggerToast('Payment method removed.', 'success');
-            }
-        },
-
-        // Mocked Notification Center
-        notifications: [
-            { title: 'Order Dispatched', message: 'Your order #ORD-YTF-987541 has been shipped and is on the way.', time: '2 hours ago', category: 'order', is_read: false },
-            { title: 'Exclusive Coupon', message: 'A secret 20% discount coupon has been added to your vault.', time: '1 day ago', category: 'promo', is_read: false },
-            { title: 'Review Approved', message: 'Your review for G-Shock Full Metal Gold has been published.', time: '3 days ago', category: 'general', is_read: true }
-        ],
-        markAsRead(index) {
-            this.notifications[index].is_read = true;
-            this.triggerToast('Marked as read.', 'success');
-        },
-        deleteNotification(index) {
-            this.notifications.splice(index, 1);
-            this.triggerToast('Notification deleted.', 'success');
-        },
-
-        // Coupon Copy Util
-        copyCoupon(code, event) {
-            navigator.clipboard.writeText(code);
-            this.triggerToast('Coupon code copied: ' + code, 'success');
-        },
-
-        // Tracking timeline modal
-        showTrackModal: false,
-        trackOrderNum: '',
-        trackStatus: 'shipped',
-        trackDetails: null,
-        getActiveStepIndex() {
-            const status = this.trackStatus.toLowerCase();
-            if (status === 'delivered') return 4;
-            if (status === 'out_for_delivery' || status === 'delivering') return 3;
-            if (status === 'shipped') return 2;
-            if (status === 'processing') return 1;
-            return 0; // pending
-        },
-        getTimelineSteps() {
-            return [
-                { title: 'Order Placed', time: 'Jul 09, 11:38 AM', location: 'Digital Hub', desc: 'Order logged and payment confirmed.' },
-                { title: 'Packed & Dispatched', time: 'Jul 09, 03:15 PM', location: 'Warehouse Facility', desc: 'Packed and hand-over to courier partner.' },
-                { title: 'In Transit (Shipped)', time: 'Jul 10, 09:00 AM', location: 'Cargo Hub', desc: 'In-transit via Air Express Cargo.' },
-                { title: 'Out For Delivery', time: 'Jul 11, 08:30 AM', location: 'Bandra Center', desc: 'Package out with delivery executive Rohan.' },
-                { title: 'Delivered', time: 'Jul 11, 01:45 PM', location: 'Customer Doorstep', desc: 'Delivered and verified by signature.' }
-            ];
-        },
-        openTrackModal(orderNum, status) {
-            this.trackOrderNum = orderNum;
-            this.trackStatus = status;
-            
-            const courier = 'Delhivery Express';
-            const trackingNo = 'DEL' + orderNum + 'IN';
-            
-            this.trackDetails = {
-                order_num: orderNum,
-                status: status,
-                tracking_no: trackingNo,
-                courier: courier,
-                weight: '1.25 kg',
-                address: 'Roopesh Kumar, 124 Luxury Boulevard, Bandra West, Mumbai, MH - 400050',
-                method: 'Premium Air Delivery',
-                progress: status === 'delivered' ? 100 : (status === 'shipped' ? 65 : (status === 'processing' ? 35 : 15)),
-                product: {
-                    name: 'Vintage Digital Gold D182',
-                    brand: 'ShopMe Classic',
-                    price: '₹4,795.00',
-                    quantity: 1,
-                    image: 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=150&q=80'
-                }
-            };
-            this.showTrackModal = true;
-        },
-
-        // Support tickets simulation
-        tickets: [
-            { id: 'TKT-991', subject: 'Refund Query', status: 'resolved', date: 'Jul 05, 2026' },
-            { id: 'TKT-885', subject: 'Exchange Size issue', status: 'open', date: 'Jul 08, 2026' }
-        ],
-        showSupportModal: false,
-        supportForm: { subject: '', priority: 'medium', message: '' },
-        submitTicket() {
-            if(!this.supportForm.subject || !this.supportForm.message) {
-                this.triggerToast('Please fill out the ticket fields.', 'error');
-                return;
-            }
-            this.tickets.unshift({
-                id: 'TKT-' + Math.floor(100 + Math.random() * 900),
-                subject: this.supportForm.subject,
-                status: 'open',
-                date: 'Just now'
-            });
-            this.showSupportModal = false;
-            this.triggerToast('Support ticket raised successfully.', 'success');
-        },
-        downloadInvoice(orderNum) {
-            this.triggerToast('Preparing invoice download for #' + orderNum + '...', 'info');
-            
-            const invoiceWindow = window.open('', '_blank');
-            if (!invoiceWindow) {
-                this.triggerToast('Popup blocked! Please allow popups to download the invoice.', 'error');
-                return;
-            }
-
-            const today = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
-            
-            const productName = this.trackDetails?.product?.name || 'ShopMe Premium Purchase';
-            const productPrice = this.trackDetails?.product?.price || '₹4,795.00';
-            const productQty = this.trackDetails?.product?.quantity || 1;
-            const address = this.trackDetails?.address || 'Roopesh Kumar, 124 Luxury Boulevard, Bandra West, Mumbai, MH - 400050';
-            const customerName = address.split(',')[0] || 'Customer';
-
-            invoiceWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Invoice - ${orderNum}</title>
-                    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-                    <style>
-                        @media print {
-                            .no-print { display: none; }
-                        }
-                    </style>
-                </head>
-                <body class="bg-gray-50 font-sans p-6 md:p-12">
-                    <div class="max-w-3xl mx-auto bg-white p-8 border border-gray-200 rounded-2xl shadow-sm relative">
-                        <!-- Print Button -->
-                        <div class="no-print absolute top-6 right-6">
-                            <button onclick="window.print()" class="bg-[#B88A44] hover:bg-[#A77933] text-white font-bold py-2 px-4 rounded-xl transition text-xs shadow-md">
-                                Print / Save PDF
-                            </button>
-                        </div>
-
-                        <!-- Invoice Header -->
-                        <div class="flex justify-between items-start border-b border-gray-100 pb-8">
-                            <div>
-                                <h1 class="text-3xl font-serif font-black text-[#B88A44]">ShopMe</h1>
-                                <p class="text-xs text-gray-500 mt-1">Quiet Luxury E-Commerce</p>
-                            </div>
-                            <div class="text-right">
-                                <h2 class="text-xl font-bold text-gray-900">INVOICE</h2>
-                                <p class="text-xs text-gray-500 mt-1">Invoice #: ${orderNum}</p>
-                                <p class="text-xs text-gray-500">Date: ${today}</p>
-                            </div>
-                        </div>
-
-                        <!-- Addresses -->
-                        <div class="grid grid-cols-2 gap-8 py-8 border-b border-gray-100 text-xs">
-                            <div>
-                                <h3 class="font-bold text-gray-400 uppercase tracking-wider mb-2">Billed To:</h3>
-                                <p class="font-bold text-gray-800 text-sm">${customerName}</p>
-                                <p class="text-gray-600 mt-1">${address.split(',').slice(1).join(',').trim()}</p>
-                            </div>
-                            <div class="text-right">
-                                <h3 class="font-bold text-gray-400 uppercase tracking-wider mb-2">Shipped From:</h3>
-                                <p class="font-bold text-gray-800 text-sm">ShopMe Warehouse</p>
-                                <p class="text-gray-600 mt-1">Corporate Office, Level 12, Capital Towers,<br>Bandra Kurla Complex, Mumbai - 400051</p>
-                            </div>
-                        </div>
-
-                        <!-- Table -->
-                        <table class="w-full text-left border-collapse my-8 text-xs">
-                            <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="py-3 font-bold text-gray-400 uppercase tracking-wider">Item Description</th>
-                                    <th class="py-3 text-center font-bold text-gray-400 uppercase tracking-wider">Quantity</th>
-                                    <th class="py-3 text-right font-bold text-gray-400 uppercase tracking-wider">Unit Price</th>
-                                    <th class="py-3 text-right font-bold text-gray-400 uppercase tracking-wider">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-b border-gray-100">
-                                    <td class="py-4 font-bold text-gray-950">${productName}</td>
-                                    <td class="py-4 text-center text-gray-700">${productQty}</td>
-                                    <td class="py-4 text-right text-gray-700">${productPrice}</td>
-                                    <td class="py-4 text-right font-black text-gray-950">${productPrice}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <!-- Summary -->
-                        <div class="flex justify-end pt-4">
-                            <div class="w-64 text-xs space-y-2">
-                                <div class="flex justify-between text-gray-500">
-                                    <span>Subtotal:</span>
-                                    <span>${productPrice}</span>
-                                </div>
-                                <div class="flex justify-between text-gray-500">
-                                    <span>Shipping:</span>
-                                    <span class="text-emerald-600 font-bold">FREE</span>
-                                </div>
-                                <div class="flex justify-between border-t border-gray-200 pt-2 font-black text-sm text-gray-900">
-                                    <span>Total Amount Paid:</span>
-                                    <span class="text-[#B88A44]">${productPrice}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Footer -->
-                        <div class="border-t border-gray-100 pt-8 mt-12 text-center text-[10px] text-gray-400">
-                            <p>Thank you for choosing ShopMe. We appreciate your fine taste.</p>
-                            <p class="mt-1">For support queries, please contact support@shopme.com</p>
-                        </div>
-                    </div>
-                </body>
-                </html>
-            `);
-            invoiceWindow.document.close();
-            
-            setTimeout(() => {
-                invoiceWindow.print();
-            }, 500);
-        },
-        applyCoupon(code) {
-            this.triggerToast('Applying coupon: ' + code + '...', 'info');
-            setTimeout(() => {
-                this.triggerToast('Coupon ' + code + ' applied successfully!', 'success');
-                window.location.href = '{{ route('store.shop') }}?applied_coupon=' + encodeURIComponent(code);
-            }, 1000);
-        },
-        quickViewProduct: null,
-        showQuickViewModal: false,
-        openQuickView(product) {
-            this.quickViewProduct = product;
-            this.showQuickViewModal = true;
-        },
-        closeQuickView() {
-            this.showQuickViewModal = false;
-            this.quickViewProduct = null;
-        }
-    }"
+    x-data="dashboardComponent()"
+>
 >
     <!-- POLISHED HERO GREETING BANNER -->
     <div class="mb-6 bg-[#FBF8F3] border border-[#F6ECD9] rounded-[24px] p-4 sm:p-6 lg:p-8 relative overflow-hidden flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-8 hover:shadow-md transition-all duration-300 group/hero">
@@ -2322,50 +1994,341 @@
     </div>
 </div>
 
-<!-- BOTTOM NAV BAR (Mobile) -->
-<div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-100 shadow-[0_-4px_24px_rgba(0,0,0,0.06)]" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
-    <div class="flex items-center justify-around px-2 py-1.5">
-
-        {{-- Home --}}
-        <button @click="changeTab('dashboard')" class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1.5 px-2 rounded-xl transition-all duration-200 focus:outline-none" :class="activeTab === 'dashboard' ? 'text-[#B88A44]' : 'text-gray-400'">
-            <div :class="activeTab === 'dashboard' ? 'bg-[#B88A44]/12 scale-110' : ''" class="w-9 h-7 rounded-lg flex items-center justify-center transition-all duration-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" /></svg>
-            </div>
-            <span class="text-[8.5px] font-bold leading-none" :class="activeTab === 'dashboard' ? 'text-[#B88A44]' : 'text-gray-400'">Home</span>
-        </button>
-
-        {{-- Orders --}}
-        <button @click="changeTab('orders')" class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1.5 px-2 rounded-xl transition-all duration-200 focus:outline-none" :class="activeTab === 'orders' ? 'text-[#B88A44]' : 'text-gray-400'">
-            <div :class="activeTab === 'orders' ? 'bg-[#B88A44]/12 scale-110' : ''" class="w-9 h-7 rounded-lg flex items-center justify-center transition-all duration-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-            </div>
-            <span class="text-[8.5px] font-bold leading-none" :class="activeTab === 'orders' ? 'text-[#B88A44]' : 'text-gray-400'">Orders</span>
-        </button>
-
-        {{-- Wishlist --}}
-        <button @click="changeTab('wishlist')" class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1.5 px-2 rounded-xl transition-all duration-200 focus:outline-none" :class="activeTab === 'wishlist' ? 'text-[#B88A44]' : 'text-gray-400'">
-            <div :class="activeTab === 'wishlist' ? 'bg-[#B88A44]/12 scale-110' : ''" class="w-9 h-7 rounded-lg flex items-center justify-center transition-all duration-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-            </div>
-            <span class="text-[8.5px] font-bold leading-none" :class="activeTab === 'wishlist' ? 'text-[#B88A44]' : 'text-gray-400'">Wishlist</span>
-        </button>
-
-        {{-- Notifications --}}
-        <button @click="changeTab('notifications')" class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1.5 px-2 rounded-xl transition-all duration-200 focus:outline-none" :class="activeTab === 'notifications' ? 'text-[#B88A44]' : 'text-gray-400'">
-            <div :class="activeTab === 'notifications' ? 'bg-[#B88A44]/12 scale-110' : ''" class="w-9 h-7 rounded-lg flex items-center justify-center transition-all duration-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-            </div>
-            <span class="text-[8.5px] font-bold leading-none" :class="activeTab === 'notifications' ? 'text-[#B88A44]' : 'text-gray-400'">Alerts</span>
-        </button>
-
-        {{-- More (Profile Drawer) --}}
-        <button @click="drawerOpen = !drawerOpen" class="flex flex-col items-center justify-center gap-1 min-w-[56px] py-1.5 px-2 rounded-xl transition-all duration-200 focus:outline-none" :class="drawerOpen ? 'text-[#B88A44]' : 'text-gray-400'">
-            <div :class="drawerOpen ? 'bg-[#B88A44]/12 scale-110' : ''" class="w-9 h-7 rounded-lg flex items-center justify-center transition-all duration-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-            </div>
-            <span class="text-[8.5px] font-bold leading-none" :class="drawerOpen ? 'text-[#B88A44]' : 'text-gray-400'">More</span>
-        </button>
-
     </div>
 </div>
+
+<script>
+function dashboardComponent() {
+    return {
+        // Tabs state
+        activeTab: '{{ request()->query("tab", "dashboard") }}',
+        drawerOpen: false,
+        tabLoading: false,
+        changeTab(tabId) {
+            if (this.activeTab === tabId) return;
+            this.tabLoading = true;
+            this.activeTab = tabId;
+            this.drawerOpen = false;
+            setTimeout(() => { this.tabLoading = false; }, 300);
+        },
+        
+        // Modal / Notification UI feedback
+        toastMessage: '',
+        toastType: 'info',
+        showToast: false,
+        triggerToast(msg, type = 'info') {
+            this.toastMessage = msg;
+            this.toastType = type;
+            this.showToast = true;
+            setTimeout(() => { this.showToast = false; }, 3000);
+        },
+
+        // Mocked Address State
+        addresses: [
+            { label: 'Home', name: '{{ $user->name }}', street: '124, Luxury Boulevard, Bandra West', city: 'Mumbai', state: 'Maharashtra', zip: '400050', phone: '9876543210', is_default: true },
+            { label: 'Office', name: '{{ $user->name }}', street: 'Level 14, Capital Tower, Outer Ring Road', city: 'Bangalore', state: 'Karnataka', zip: '560103', phone: '9876543211', is_default: false }
+        ],
+        showAddressModal: false,
+        addressForm: { index: -1, label: 'Home', name: '', street: '', city: '', state: '', zip: '', phone: '', is_default: false },
+        
+        addAddressOpen() {
+            this.addressForm = { index: -1, label: 'Home', name: '{{ $user->name }}', street: '', city: '', state: '', zip: '', phone: '', is_default: false };
+            this.showAddressModal = true;
+        },
+        editAddress(index) {
+            const addr = this.addresses[index];
+            this.addressForm = { index: index, ...addr };
+            this.showAddressModal = true;
+        },
+        saveAddress() {
+            if (!this.addressForm.name || !this.addressForm.street || !this.addressForm.city) {
+                this.triggerToast('Please fill out all required fields.', 'error');
+                return;
+            }
+            if (this.addressForm.is_default) {
+                this.addresses.forEach(a => a.is_default = false);
+            }
+            if (this.addressForm.index === -1) {
+                // Add new
+                this.addresses.push({ ...this.addressForm });
+                this.triggerToast('New address saved successfully.', 'success');
+            } else {
+                // Update existing
+                this.addresses[this.addressForm.index] = { ...this.addressForm };
+                this.triggerToast('Address updated successfully.', 'success');
+            }
+            this.showAddressModal = false;
+        },
+        deleteAddress(index) {
+            if(confirm('Are you sure you want to delete this address?')) {
+                this.addresses.splice(index, 1);
+                this.triggerToast('Address deleted successfully.', 'success');
+            }
+        },
+
+        // Mocked Cards State
+        cards: [
+            { id: 1, brand: 'visa', number: '•••• •••• •••• 4242', expiry: '12/28', holder: '{{ strtoupper($user->name) }}', is_default: true },
+            { id: 2, brand: 'mastercard', number: '•••• •••• •••• 8855', expiry: '09/27', holder: '{{ strtoupper($user->name) }}', is_default: false }
+        ],
+        showCardModal: false,
+        cardForm: { brand: 'visa', number: '', expiry: '', holder: '', is_default: false },
+        
+        saveCard() {
+            if(!this.cardForm.number || !this.cardForm.expiry || !this.cardForm.holder) {
+                this.triggerToast('Please complete the card details.', 'error');
+                return;
+            }
+            if (this.cardForm.is_default) {
+                this.cards.forEach(c => c.is_default = false);
+            }
+            // Format card number to mask
+            let masked = '•••• •••• •••• ' + this.cardForm.number.slice(-4);
+            this.cards.push({
+                id: Date.now(),
+                brand: this.cardForm.brand,
+                number: masked,
+                expiry: this.cardForm.expiry,
+                holder: this.cardForm.holder.toUpperCase(),
+                is_default: this.cardForm.is_default
+            });
+            this.showCardModal = false;
+            this.triggerToast('Saved card successfully.', 'success');
+        },
+        deleteCard(id) {
+            if (confirm('Delete this payment method?')) {
+                this.cards = this.cards.filter(c => c.id !== id);
+                this.triggerToast('Payment method removed.', 'success');
+            }
+        },
+
+        // Mocked Notification Center
+        notifications: [
+            { title: 'Order Dispatched', message: 'Your order #ORD-YTF-987541 has been shipped and is on the way.', time: '2 hours ago', category: 'order', is_read: false },
+            { title: 'Exclusive Coupon', message: 'A secret 20% discount coupon has been added to your vault.', time: '1 day ago', category: 'promo', is_read: false },
+            { title: 'Review Approved', message: 'Your review for G-Shock Full Metal Gold has been published.', time: '3 days ago', category: 'general', is_read: true }
+        ],
+        markAsRead(index) {
+            this.notifications[index].is_read = true;
+            this.triggerToast('Marked as read.', 'success');
+        },
+        deleteNotification(index) {
+            this.notifications.splice(index, 1);
+            this.triggerToast('Notification deleted.', 'success');
+        },
+
+        // Coupon Copy Util
+        copyCoupon(code, event) {
+            navigator.clipboard.writeText(code);
+            this.triggerToast('Coupon code copied: ' + code, 'success');
+        },
+
+        // Tracking timeline modal
+        showTrackModal: false,
+        trackOrderNum: '',
+        trackStatus: 'shipped',
+        trackDetails: null,
+        getActiveStepIndex() {
+            const status = this.trackStatus.toLowerCase();
+            if (status === 'delivered') return 4;
+            if (status === 'out_for_delivery' || status === 'delivering') return 3;
+            if (status === 'shipped') return 2;
+            if (status === 'processing') return 1;
+            return 0; // pending
+        },
+        getTimelineSteps() {
+            return [
+                { title: 'Order Placed', time: 'Jul 09, 11:38 AM', location: 'Digital Hub', desc: 'Order logged and payment confirmed.' },
+                { title: 'Packed & Dispatched', time: 'Jul 09, 03:15 PM', location: 'Warehouse Facility', desc: 'Packed and hand-over to courier partner.' },
+                { title: 'In Transit (Shipped)', time: 'Jul 10, 09:00 AM', location: 'Cargo Hub', desc: 'In-transit via Air Express Cargo.' },
+                { title: 'Out For Delivery', time: 'Jul 11, 08:30 AM', location: 'Bandra Center', desc: 'Package out with delivery executive Rohan.' },
+                { title: 'Delivered', time: 'Jul 11, 01:45 PM', location: 'Customer Doorstep', desc: 'Delivered and verified by signature.' }
+            ];
+        },
+        openTrackModal(orderNum, status) {
+            this.trackOrderNum = orderNum;
+            this.trackStatus = status;
+            
+            const courier = 'Delhivery Express';
+            const trackingNo = 'DEL' + orderNum + 'IN';
+            
+            this.trackDetails = {
+                order_num: orderNum,
+                status: status,
+                tracking_no: trackingNo,
+                courier: courier,
+                weight: '1.25 kg',
+                address: 'Roopesh Kumar, 124 Luxury Boulevard, Bandra West, Mumbai, MH - 400050',
+                method: 'Premium Air Delivery',
+                progress: status === 'delivered' ? 100 : (status === 'shipped' ? 65 : (status === 'processing' ? 35 : 15)),
+                product: {
+                    name: 'Vintage Digital Gold D182',
+                    brand: 'ShopMe Classic',
+                    price: '₹4,795.00',
+                    quantity: 1,
+                    image: 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=150&q=80'
+                }
+            };
+            this.showTrackModal = true;
+        },
+
+        // Support tickets simulation
+        tickets: [
+            { id: 'TKT-991', subject: 'Refund Query', status: 'resolved', date: 'Jul 05, 2026' },
+            { id: 'TKT-885', subject: 'Exchange Size issue', status: 'open', date: 'Jul 08, 2026' }
+        ],
+        showSupportModal: false,
+        supportForm: { subject: '', priority: 'medium', message: '' },
+        submitTicket() {
+            if(!this.supportForm.subject || !this.supportForm.message) {
+                this.triggerToast('Please fill out the ticket fields.', 'error');
+                return;
+            }
+            this.tickets.unshift({
+                id: 'TKT-' + Math.floor(100 + Math.random() * 900),
+                subject: this.supportForm.subject,
+                status: 'open',
+                date: 'Just now'
+            });
+            this.showSupportModal = false;
+            this.triggerToast('Support ticket raised successfully.', 'success');
+        },
+        downloadInvoice(orderNum) {
+            this.triggerToast('Preparing invoice download for #' + orderNum + '...', 'info');
+            
+            const invoiceWindow = window.open('', '_blank');
+            if (!invoiceWindow) {
+                this.triggerToast('Popup blocked! Please allow popups to download the invoice.', 'error');
+                return;
+            }
+
+            const today = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            const productName = this.trackDetails?.product?.name || 'ShopMe Premium Purchase';
+            const productPrice = this.trackDetails?.product?.price || '₹4,795.00';
+            const productQty = this.trackDetails?.product?.quantity || 1;
+            const address = this.trackDetails?.address || 'Roopesh Kumar, 124 Luxury Boulevard, Bandra West, Mumbai, MH - 400050';
+            const customerName = address.split(',')[0] || 'Customer';
+
+            invoiceWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Invoice - \${orderNum}</title>
+                    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+                    <style>
+                        @media print {
+                            .no-print { display: none; }
+                        }
+                    </style>
+                </head>
+                <body class="bg-gray-50 font-sans p-6 md:p-12">
+                    <div class="max-w-3xl mx-auto bg-white p-8 border border-gray-200 rounded-2xl shadow-sm relative">
+                        <!-- Print Button -->
+                        <div class="no-print absolute top-6 right-6">
+                            <button onclick="window.print()" class="bg-[#B88A44] hover:bg-[#A77933] text-white font-bold py-2 px-4 rounded-xl transition text-xs shadow-md">
+                                Print / Save PDF
+                            </button>
+                        </div>
+
+                        <!-- Invoice Header -->
+                        <div class="flex justify-between items-start border-b border-gray-100 pb-8">
+                            <div>
+                                <h1 class="text-3xl font-serif font-black text-[#B88A44]">ShopMe</h1>
+                                <p class="text-xs text-gray-500 mt-1">Quiet Luxury E-Commerce</p>
+                            </div>
+                            <div class="text-right">
+                                <h2 class="text-xl font-bold text-gray-900">INVOICE</h2>
+                                <p class="text-xs text-gray-500 mt-1">Invoice #: \${orderNum}</p>
+                                <p class="text-xs text-gray-500">Date: \${today}</p>
+                            </div>
+                        </div>
+
+                        <!-- Addresses -->
+                        <div class="grid grid-cols-2 gap-8 py-8 border-b border-gray-100 text-xs">
+                            <div>
+                                <h3 class="font-bold text-gray-400 uppercase tracking-wider mb-2">Billed To:</h3>
+                                <p class="font-bold text-gray-800 text-sm">\${customerName}</p>
+                                <p class="text-gray-600 mt-1">\${address.split(',').slice(1).join(',').trim()}</p>
+                            </div>
+                            <div class="text-right">
+                                <h3 class="font-bold text-gray-400 uppercase tracking-wider mb-2">Shipped From:</h3>
+                                <p class="font-bold text-gray-800 text-sm">ShopMe Warehouse</p>
+                                <p class="text-gray-600 mt-1">Corporate Office, Level 12, Capital Towers,<br>Bandra Kurla Complex, Mumbai - 400051</p>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <table class="w-full text-left border-collapse my-8 text-xs">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="py-3 font-bold text-gray-400 uppercase tracking-wider">Item Description</th>
+                                    <th class="py-3 text-center font-bold text-gray-400 uppercase tracking-wider">Quantity</th>
+                                    <th class="py-3 text-right font-bold text-gray-400 uppercase tracking-wider">Unit Price</th>
+                                    <th class="py-3 text-right font-bold text-gray-400 uppercase tracking-wider">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-4 font-bold text-gray-950">\${productName}</td>
+                                    <td class="py-4 text-center text-gray-700">\${productQty}</td>
+                                    <td class="py-4 text-right text-gray-700">\${productPrice}</td>
+                                    <td class="py-4 text-right font-black text-gray-950">\${productPrice}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Summary -->
+                        <div class="flex justify-end pt-4">
+                            <div class="w-64 text-xs space-y-2">
+                                <div class="flex justify-between text-gray-500">
+                                    <span>Subtotal:</span>
+                                    <span>\${productPrice}</span>
+                                </div>
+                                <div class="flex justify-between text-gray-500">
+                                    <span>Shipping:</span>
+                                    <span class="text-emerald-600 font-bold">FREE</span>
+                                </div>
+                                <div class="flex justify-between border-t border-gray-200 pt-2 font-black text-sm text-gray-900">
+                                    <span>Total Amount Paid:</span>
+                                    <span class="text-[#B88A44]">\${productPrice}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="border-t border-gray-100 pt-8 mt-12 text-center text-[10px] text-gray-400">
+                            <p>Thank you for choosing ShopMe. We appreciate your fine taste.</p>
+                            <p class="mt-1">For support queries, please contact support@shopme.com</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+            `);
+            invoiceWindow.document.close();
+            
+            setTimeout(() => {
+                invoiceWindow.print();
+            }, 500);
+        },
+        applyCoupon(code) {
+            this.triggerToast('Applying coupon: ' + code + '...', 'info');
+            setTimeout(() => {
+                this.triggerToast('Coupon ' + code + ' applied successfully!', 'success');
+                window.location.href = '{{ route('store.shop') }}?applied_coupon=' + encodeURIComponent(code);
+            }, 1000);
+        },
+        quickViewProduct: null,
+        showQuickViewModal: false,
+        openQuickView(product) {
+            this.quickViewProduct = product;
+            this.showQuickViewModal = true;
+        },
+        closeQuickView() {
+            this.showQuickViewModal = false;
+            this.quickViewProduct = null;
+        }
+    };
+}
+</script>
 @endsection
